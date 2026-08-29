@@ -3,164 +3,282 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mill Counter</title>
+<title>Mill Counter ULTIMATE PRO</title>
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiTWlsbCBDb3VudGVyIiwic2hvcnRfbmFtZSI6Ik1pbGxDb3VudGVyIiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmMGZkZjQiLCJ0aGVtZV9jb2xvciI6IiMxNmEzNGEifQ==">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
+:root{--bg:#f0fdf4;--card:#fff;--text:#111;--border:#e5e7eb;--green:#16a34a;--red:#dc2626}
+body.dark{--bg:#0f172a;--card:#1e293b;--text:#f1f5f9;--border:#334155}
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
-body{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:15px;color:#fff;min-height:100vh}
-.container{max-width:500px;margin:auto}
-h1{text-align:center;margin:10px 0 20px;font-size:24px}
-.card{background:#ffffff22;backdrop-filter:blur(5px);border-radius:20px;padding:20px;margin-bottom:15px;overflow:hidden}
-h3{margin-bottom:12px;font-size:18px}
-
-.rates{display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;margin-bottom:15px}
-.rates input{width:100%;padding:12px;border:none;border-radius:12px;background:#ffffff33;color:#fff;font-size:16px}
-.rates input::placeholder{color:#eee}
-
-.btns{display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;margin-bottom:10px}
-.btns-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-button{padding:14px;border:none;border-radius:15px;font-size:15px;font-weight:600;cursor:pointer}
-button:disabled{opacity:0.4;cursor:not-allowed}
-.btn-full{background:#4CAF50;color:#fff}
-.btn-noon{background:#FF9800;color:#fff}
-.btn-night{background:#9C27B0;color:#fff}
-.btn-undo{background:#f44336;color:#fff}
-.btn-reset{background:#607D8B;color:#fff}
-
-.summary{display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;text-align:center}
-.box{background:#ffffff33;padding:15px;border-radius:15px}
-.box h2{font-size:24px;margin-bottom:4px}
-.total{font-size:28px;text-align:center;margin-top:15px;font-weight:700}
-.item{display:flex;justify-content:space-between;background:#ffffff22;padding:10px;border-radius:10px;margin-bottom:8px}
-.date-input{width:100%;padding:12px;border:none;border-radius:12px;margin-bottom:10px;background:#ffffff33;color:#fff}
-#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#000;padding:12px 18px;border-radius:10px;display:none;z-index:999}
+body{background:var(--bg);color:var(--text);padding:12px;min-height:100vh;transition:.3s}
+.container{max-width:560px;margin:auto}
+.header{display:flex;justify-content:space-between;align-items:center;margin:8px 0 12px}
+.header h1{font-size:24px;color:var(--green);font-weight:900}.header h1 span{color:var(--red)}
+.iconBtn{background:var(--card);border:1px solid var(--border);padding:8px 10px;border-radius:10px;cursor:pointer;color:var(--text)}
+.card{background:var(--card);border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:0 4px 20px #0001;border:1px solid var(--border)}
+h3{font-size:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.tabs{display:flex;background:var(--card);padding:5px;border-radius:12px;margin-bottom:12px;gap:5px;border:1px solid var(--border);position:sticky;top:5px;z-index:10}
+.tab{flex:1;padding:10px;text-align:center;border-radius:9px;font-weight:700;cursor:pointer;color:#6b7280;font-size:12px}
+.tab.active{background:var(--green);color:#fff}.tab.active.red{background:var(--red);color:#fff}
+input,select{width:100%;padding:11px;border:1.5px solid var(--border);border-radius:11px;background:var(--bg);color:var(--text);font-size:13px;outline:none;margin-bottom:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+button{padding:11px;border:none;border-radius:11px;font-size:12px;font-weight:700;cursor:pointer;transition:.2s}
+.btn-full{background:var(--green);color:#fff}.btn-noon{background:#f59e0b;color:#fff}.btn-night{background:var(--red);color:#fff}
+.btn-undo{background:#fee2e2;color:var(--red)}.btn-reset{background:var(--bg);color:var(--text);border:1px solid var(--border)}
+.btn-pay{background:linear-gradient(135deg,var(--green),#15803d);color:#fff;width:100%}.btn-gpay{background:linear-gradient(135deg,#4285F4,#34A853);color:#fff}
+.btn-pdf{background:linear-gradient(135deg,var(--red),#991b1b);color:#fff;width:100%;margin-top:6px}
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.box{background:var(--bg);padding:12px;border-radius:12px;border:1px solid var(--border)}.box h2{font-size:18px}
+.box.green{border-color:#bbf7d0;color:var(--green)}.box.red{border-color:#fecaca;color:var(--red)}
+.item{display:flex;justify-content:space-between;align-items:center;background:var(--bg);padding:10px;border-radius:11px;margin-bottom:7px;font-size:12px;border:1px solid var(--border)}
+.badge{padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700}
+.badge-full{background:#dcfce7;color:#166534}.badge-noon{background:#fef3c7;color:#92400e}.badge-night{background:#fee2e2;color:#991b1b}
+.status{padding:4px 8px;border-radius:20px;font-size:10px;font-weight:800}.paid{background:#dcfce7;color:#166534}.due{background:#fee2e2;color:#991b1b}
+.actBtn{padding:5px 8px;border-radius:7px;font-size:11px;margin-left:4px}
+.hidden{display:none}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:10px;display:none;z-index:999}
+.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:#0008;display:none;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.modalBox{background:var(--card);border-radius:18px;padding:18px;width:100%;max-width:360px;border:1px solid var(--border)}
+canvas{max-width:100%;margin-top:10px}
+.wa{background:#25D366;color:#fff;padding:4px 8px;border-radius:6px;text-decoration:none;font-size:11px}
 </style>
 </head>
 <body>
 <div class="container">
-<h1>📊 Mill Counter</h1>
-
-<div class="card">
-<h3>Set Rates</h3>
-<div class="rates">
-<input type="number" id="fullRate" value="100" placeholder="Full">
-<input type="number" id="noonRate" value="70" placeholder="Noon">
-<input type="number" id="nightRate" value="50" placeholder="Night">
-</div>
-<input type="date" id="date" class="date-input">
-<div class="btns">
-<button class="btn-full" id="btnFull" onclick="add('full')">+ Full Day</button>
-<button class="btn-noon" id="btnNoon" onclick="add('noon')">+ Noon</button>
-<button class="btn-night" id="btnNight" onclick="add('night')">+ Night</button>
-</div>
-<div class="btns-2">
-<button class="btn-undo" onclick="undo()">↩ Undo Last</button>
-<button class="btn-reset" onclick="reset()">🗑 Reset All</button>
-</div>
+<div class="header">
+<h1>📊 Mill <span>PRO</span></h1>
+<div><button class="iconBtn" onclick="toggleDark()">🌙</button> <button class="iconBtn" id="installBtn" style="display:none" onclick="installPWA()">📲 Install</button></div>
 </div>
 
-<div class="card">
-<h3>This Month</h3>
-<div class="summary">
-<div class="box"><h2 id="fullCount">0</h2><p>Full</p></div>
-<div class="box"><h2 id="noonCount">0</h2><p>Noon</p></div>
-<div class="box"><h2 id="nightCount">0</h2><p>Night</p></div>
-</div>
-<div class="total">Total: <span id="totalAmount">0</span> Tk</div>
+<div class="tabs">
+<div class="tab active" id="tMill" onclick="switchTab('mill')">Mill</div>
+<div class="tab red" id="tPay" onclick="switchTab('pay')">Pay</div>
+<div class="tab" id="tDash" onclick="switchTab('dash')">Report</div>
+<div class="tab" id="tSet" onclick="switchTab('set')">Data</div>
 </div>
 
+<!-- MILL -->
+<div id="viewMill">
 <div class="card">
-<h3>History</h3>
-<div id="history"></div>
+<h3>Set Rates (Tk)</h3>
+<div class="grid3"><input type="number" id="fullRate" value="100"><input type="number" id="noonRate" value="70"><input type="number" id="nightRate" value="50"></div>
+<div class="grid2"><input type="date" id="date"><select id="monthFilter" onchange="updateUI()"><option value="">All Months</option></select></div>
+<div class="grid2"><input type="date" id="filterFrom" placeholder="From"><input type="date" id="filterTo" placeholder="To"></div>
+<div class="grid3"><button class="btn-full" onclick="add('full')">+ Full</button><button class="btn-noon" onclick="add('noon')">+ Noon</button><button class="btn-night" onclick="add('night')">+ Night</button></div>
+<div class="grid2" style="margin-top:8px"><button class="btn-undo" onclick="undo()">↩ Undo</button><button class="btn-reset" onclick="clearFilter()">Clear Filter</button></div>
+</div>
+<div class="card">
+<div class="summary"><div class="box green"><h2 id="fullCount">0</h2><p>Full</p></div><div class="box"><h2 id="noonCount">0</h2><p>Noon</p></div><div class="box red"><h2 id="nightCount">0</h2><p>Night</p></div></div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;background:var(--bg);padding:12px;border-radius:12px;border:1px solid var(--border)"><span><b>Total: <span id="totalAmount" style="color:var(--red)">0</span> Tk</b> <span id="payStatus" class="status due" style="margin-left:8px">DUE</span></span><button class="btn-gpay" style="padding:8px 14px;border-radius:20px" onclick="payWithGPay()">💳 PAY</button></div>
+<canvas id="millChart" height="120"></canvas>
+</div>
+<div class="card"><input type="text" id="searchMill" placeholder="🔍 Search date / type..." oninput="updateUI()"><div id="history"></div></div>
+</div>
+
+<!-- PAY -->
+<div id="viewPay">
+<div class="card" style="border-top:4px solid var(--red)">
+<h3>Add Payment</h3>
+<div class="grid2"><input type="text" id="payerName" placeholder="Payer Name"><input type="text" id="receiverName" placeholder="Receiver Name"></div>
+<div class="grid2"><input type="tel" id="payerPhone" placeholder="Payer WA 8801..."><input type="tel" id="receiverPhone" placeholder="Receiver WA"></div>
+<div class="grid2"><input type="number" id="payAmount" placeholder="Amount"><input type="date" id="payDate"></div>
+<input type="text" id="payNote" placeholder="Note">
+<button class="btn-pay" onclick="addPayment()">💸 Save + WA Both</button>
+</div>
+<div class="card"><div class="grid2"><input type="text" id="searchPay" placeholder="🔍 Search payer..." oninput="renderPayments()"><input type="date" id="payMonthFilter" onchange="renderPayments()"></div><div id="paymentHistory"></div><canvas id="payChart" height="130"></canvas></div>
+</div>
+
+<!-- DASH -->
+<div id="viewDash">
+<div class="card"><h3>Monthly Billing</h3><div class="summary"><div class="box"><h2 id="dashBill">0</h2><p>Bill</p></div><div class="box green"><h2 id="dashPaid">0</h2><p>Paid</p></div><div class="box red"><h2 id="dashDue">0</h2><p>Due</p></div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px"><button class="btn-gpay" onclick="payWithGPay()">💳 GPay Due</button><button class="btn-pdf" onclick="generatePDF(true)">📄 PDF + WA</button></div>
+</div>
+<div class="card"><h3>Payer-wise Records</h3><div id="payerReport"></div></div>
+<div class="card"><h3>Monthly Report</h3><div id="monthlyReport"></div></div>
+</div>
+
+<!-- SETTINGS / DATA SAFETY -->
+<div id="viewSet" class="hidden">
+<div class="card" style="border:2px solid var(--green)"><h3>💳 GPay Receiver Setup</h3><input type="text" id="receiverUPI" placeholder="UPI ID (ex: name@okaxis)"><div class="grid2"><input type="text" id="receiverUPIName" placeholder="Receiver Name"><input type="tel" id="receiverBillPhone" placeholder="WA for Bill"></div><button class="btn-pay" onclick="saveReceiver()">Save Receiver</button></div>
+<div class="card"><h3>🛡️ Data Safety</h3><div class="grid2"><button class="btn-pay" onclick="exportJSON()">💾 Export JSON</button><button class="btn-pay" style="background:#0ea5e9" onclick="document.getElementById('importFile').click()">📥 Import JSON</button></div><input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)"><div class="grid2" style="margin-top:8px"><button class="btn-pay" style="background:#111" onclick="exportCSV()">📊 Export CSV/Excel</button><button class="btn-reset" onclick="clearAllData()">🗑️ Clear All (Confirm)</button></div><small style="color:#888;display:block;margin-top:8px">Auto-saving enabled to LocalStorage.</small></div>
+<div class="card"><h3>Documents</h3><button class="btn-pdf" onclick="generatePDF(false)">📄 Professional PDF Invoice</button><button class="btn-pay" style="background:#25D366;margin-top:8px" onclick="shareWhatsApp()">📱 Share Summary on WhatsApp</button></div>
 </div>
 </div>
+
+<!-- EDIT MODAL -->
+<div class="modal" id="editModal"><div class="modalBox"><h3 id="editTitle">Edit Entry</h3><input type="date" id="editDate"><select id="editType"><option value="full">Full</option><option value="noon">Noon</option><option value="night">Night</option></select><div class="grid2"><button class="btn-reset" onclick="closeEdit()">Cancel</button><button class="btn-pay" onclick="saveEdit()">Save</button></div></div></div>
+
+<div class="modal" id="gpayModal"><div class="modalBox" style="text-align:center"><h3 style="color:var(--green);justify-content:center">💳 Google Pay Opened?</h3><p style="font-size:12px;color:#888;margin:8px 0">Complete payment then confirm. PDF will auto-generate & send to receiver WA.</p><h3 id="modalAmount" style="color:var(--red);justify-content:center"></h3><div class="grid2" style="margin-top:12px"><button class="btn-reset" onclick="closeGPay()">Cancel</button><button class="btn-pay" onclick="confirmPayment()">✅ I Paid</button></div></div></div>
 
 <div id="toast"></div>
 
 <script>
-let data = JSON.parse(localStorage.getItem('millDataV5')) || [];
-const dateEl = document.getElementById('date');
-const btnFull = document.getElementById('btnFull');
-const btnNoon = document.getElementById('btnNoon');
-const btnNight = document.getElementById('btnNight');
-dateEl.valueAsDate = new Date();
+let data=JSON.parse(localStorage.getItem('millDataV5')||'[]');
+let payments=JSON.parse(localStorage.getItem('millPaymentsV2')||'[]');
+let receiverInfo=JSON.parse(localStorage.getItem('millReceiverInfo')||'{}');
+let editingIndex=null, pendingPay=0, millChartInst=null, payChartInst=null;
+const dateEl=document.getElementById('date'); dateEl.valueAsDate=new Date(); payDate.valueAsDate=new Date();
+if(receiverInfo.upi){receiverUPI.value=receiverInfo.upi; receiverUPIName.value=receiverInfo.name; receiverBillPhone.value=receiverInfo.phone;}
+if(localStorage.getItem('dark')==='1'){document.body.classList.add('dark');}
 
-function showToast(msg){
-  const t = document.getElementById('toast');
-  t.innerText = msg; 
-  t.style.display = 'block';
-  setTimeout(() => t.style.display = 'none', 2000);
+function toggleDark(){document.body.classList.toggle('dark'); localStorage.setItem('dark', document.body.classList.contains('dark')?'1':'0');}
+function switchTab(t){
+ ['mill','pay','dash','set'].forEach(x=>document.getElementById('view'+x.charAt(0).toUpperCase()+x.slice(1)).classList.toggle('hidden',x!==t));
+ ['tMill','tPay','tDash','tSet'].forEach(id=>document.getElementById(id).classList.remove('active'));
+ document.getElementById('t'+t.charAt(0).toUpperCase()+t.slice(1)).classList.add('active');
+ if(t==='dash') updateDash(); if(t==='pay') renderPayments();
 }
+function toast(m){let t=document.getElementById('toast');t.innerText=m;t.style.display='block';setTimeout(()=>t.style.display='none',2200);}
+function saveAll(){localStorage.setItem('millDataV5',JSON.stringify(data)); localStorage.setItem('millPaymentsV2',JSON.stringify(payments));}
 
-function save(){
-  localStorage.setItem('millDataV5', JSON.stringify(data));
-  updateUI();
-}
-
+// CORE: Multiple same date allowed - removed check
 function add(type){
-  let selectedDate = dateEl.value;
-  let alreadyExists = data.find(x => x.date === selectedDate);
-  
-  if(alreadyExists){
-    showToast("❌ This date already has an entry. Undo first.");
-    return;
-  }
-  
-  data.push({date: selectedDate, type: type, ts: Date.now()});
-  showToast("✅ " + type + " added");
-  save();
+ let sel=dateEl.value; if(!sel) return toast('Pick date');
+ data.push({id:Date.now(),date:sel,type:type,ts:Date.now()}); saveAll(); updateUI(); updateDash(); toast('✅ '+type+' added');
 }
-
-function undo(){
-  if(data.length === 0){
-    showToast("Nothing to undo");
-    return;
-  }
-  data.pop();
-  showToast("↩ Last entry undone");
-  save();
+function undo(){ if(!data.length) return toast('Nothing'); data.pop(); saveAll(); updateUI(); }
+function clearFilter(){filterFrom.value='';filterTo.value='';monthFilter.value='';searchMill.value='';updateUI();}
+function editMill(i){ editingIndex=i; let e=data[i]; editDate.value=e.date; editType.value=e.type; editTitle.innerText='Edit Mill Entry'; document.getElementById('editModal').style.display='flex';}
+function editPay(i){ editingIndex=i; let p=payments[i]; document.getElementById('editModal').style.display='flex'; editTitle.innerText='Edit Payment - use Pay tab to edit'; closeEdit(); renderPayments(); // for simplicity edit via delete+add
+ let ans=prompt(`Edit Amount for ${p.payer}:`,p.amt); if(ans){ payments[i].amt=+ans; saveAll(); renderPayments(); updateDash(); }
 }
-
-function reset(){
-  if(confirm('Delete ALL data?')){
-    data = [];
-    save();
-    showToast("🗑 All data deleted");
-  }
-}
+function saveEdit(){ if(editingIndex===null) return; data[editingIndex].date=editDate.value; data[editingIndex].type=editType.value; saveAll(); closeEdit(); updateUI(); }
+function closeEdit(){ document.getElementById('editModal').style.display='none'; editingIndex=null;}
+function deleteMill(i){ if(confirm('Delete this entry?')){ data.splice(i,1); saveAll(); updateUI(); updateDash(); } }
+function deletePay(i){ if(confirm('Delete payment?')){ payments.splice(i,1); saveAll(); renderPayments(); updateDash(); } }
 
 function updateUI(){
-  let f = +document.getElementById('fullRate').value;
-  let n = +document.getElementById('noonRate').value;
-  let ng = +document.getElementById('nightRate').value;
-
-  let fc = data.filter(x => x.type === 'full').length;
-  let nc = data.filter(x => x.type === 'noon').length;
-  let ngc = data.filter(x => x.type === 'night').length;
-
-  document.getElementById('fullCount').innerText = fc;
-  document.getElementById('noonCount').innerText = nc;
-  document.getElementById('nightCount').innerText = ngc;
-  
-  let total = fc * f + nc * n + ngc * ng;
-  document.getElementById('totalAmount').innerText = total;
-
-  // 1 Day = 1 Entry Rule: Disable buttons if date already has entry
-  let selectedDate = dateEl.value;
-  let existing = data.find(x => x.date === selectedDate);
-  btnFull.disabled = btnNoon.disabled = btnNight.disabled = !!existing;
-
-  document.getElementById('history').innerHTML = data.slice().reverse().map(x => {
-    let label = x.type === 'full' ? 'Full' : x.type === 'noon' ? 'Noon' : 'Night';
-    return `<div class="item"><span>${x.date}</span><span><b>${label}</b></span></div>`
-  }).join('');
+ let f=+fullRate.value, n=+noonRate.value, ng=+nightRate.value;
+ let q=(searchMill.value||'').toLowerCase(), from=filterFrom.value, to=filterTo.value, mf=monthFilter.value;
+ // month filter options
+ let months=[...new Set(data.map(d=>d.date.slice(0,7)))].sort().reverse();
+ monthFilter.innerHTML='<option value="">All Months</option>'+months.map(m=>`<option value="${m}" ${m===mf?'selected':''}>${m}</option>`).join('');
+ let filtered=data.filter(d=>{
+   let ok=true; if(q &&!(d.date+d.type).toLowerCase().includes(q)) ok=false;
+   if(from && d.date<from) ok=false; if(to && d.date>to) ok=false; if(mf &&!d.date.startsWith(mf)) ok=false; return ok;
+ });
+ let fc=filtered.filter(x=>x.type==='full').length, nc=filtered.filter(x=>x.type==='noon').length, ngc=filtered.filter(x=>x.type==='night').length;
+ fullCount.innerText=fc; noonCount.innerText=nc; nightCount.innerText=ngc;
+ let total=fc*f+nc*n+ngc*ng; totalAmount.innerText=total;
+ let paid=payments.reduce((s,p)=>s+p.amt,0);
+ let paySt=document.getElementById('payStatus'); if(total-paid<=0){paySt.innerText='PAID'; paySt.className='status paid';} else {paySt.innerText='DUE'; paySt.className='status due';}
+ history.innerHTML=filtered.slice().reverse().map((x,idx)=>{
+   let realIdx=data.indexOf(x);
+   return `<div class="item"><span>${x.date} <span class="badge badge-${x.type}">${x.type}</span></span><span><button class="actBtn btn-reset" onclick="editMill(${realIdx})">✏️</button><button class="actBtn btn-undo" onclick="deleteMill(${realIdx})">🗑️</button></span></div>`
+ }).join('')||'<p style="text-align:center;color:#999">No entries</p>';
+ // chart
+ let ctx=document.getElementById('millChart'); if(millChartInst) millChartInst.destroy();
+ millChartInst=new Chart(ctx,{type:'bar',data:{labels:['Full','Noon','Night'],datasets:[{label:'Count',data:[fc,nc,ngc],backgroundColor:['#16a34a','#f59e0b','#dc2626']}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
 }
 
-document.getElementById('fullRate').oninput = updateUI;
-document.getElementById('noonRate').oninput = updateUI;
-document.getElementById('nightRate').oninput = updateUI;
-dateEl.onchange = updateUI;
+// PAYMENTS
+function addPayment(){
+ let payer=payerName.value.trim(), receiver=receiverName.value.trim(), pPhone=payerPhone.value.trim().replace(/[^0-9]/g,''), rPhone=receiverPhone.value.trim().replace(/[^0-9]/g,''), amt=+payAmount.value, d=payDate.value, note=payNote.value.trim();
+ if(!payer||!receiver||!amt||!d) return toast('Fill all');
+ payments.push({id:Date.now(),payer,receiver,pPhone,rPhone,amt,d,note}); saveAll(); renderPayments(); updateDash(); toast('✅ Payment saved');
+ if(pPhone) window.open(`https://wa.me/${pPhone}?text=${encodeURIComponent('✅ Paid '+amt+' Tk to '+receiver)}`,'_blank');
+ setTimeout(()=>{ if(rPhone) window.open(`https://wa.me/${rPhone}?text=${encodeURIComponent('💰 Received '+amt+' Tk from '+payer)}`,'_blank'); },900);
+ payerName.value=receiverName.value=payerPhone.value=receiverPhone.value=payAmount.value=payNote.value='';
+}
+function renderPayments(){
+ let q=(searchPay.value||'').toLowerCase(), mf=payMonthFilter.value;
+ let filtered=payments.filter(p=>{ let ok=true; if(q &&!(p.payer+p.receiver).toLowerCase().includes(q)) ok=false; if(mf &&!p.d.startsWith(mf)) ok=false; return ok; });
+ paymentHistory.innerHTML=filtered.slice().reverse().map((p,idx)=>{
+   let real=data=payments.indexOf(p);
+   return `<div class="item"><div><b>${p.payer}</b>→<b>${p.receiver}</b><br><small>${p.d} | ${p.note||''}</small></div><div style="text-align:right"><b style="color:var(--green)">${p.amt} Tk</b><br><button class="actBtn btn-reset" onclick="editPay(${real})">✏️</button><button class="actBtn btn-undo" onclick="deletePay(${real})">🗑️</button> <a class="wa" href="https://wa.me/${p.pPhone}?text=${encodeURIComponent('Paid '+p.amt)}" target="_blank">WA</a></div></div>`
+ }).join('')||'<p style="text-align:center;color:#999">No payments</p>';
+ let ctx=document.getElementById('payChart'); if(payChartInst) payChartInst.destroy();
+ let map={}; filtered.forEach(p=>{ map[p.payer]=(map[p.payer]||0)+p.amt; });
+ payChartInst=new Chart(ctx,{type:'doughnut',data:{labels:Object.keys(map),datasets:[{data:Object.values(map),backgroundColor:['#16a34a','#dc2626','#f59e0b','#0ea5e9','#8b5cf6']}]},options:{plugins:{legend:{position:'bottom'}}}});
+}
 
-updateUI();
+// BILLING
+function updateDash(){
+ let f=+fullRate.value, n=+noonRate.value, ng=+nightRate.value;
+ let bill=data.filter(x=>x.type==='full').length*f + data.filter(x=>x.type==='noon').length*n + data.filter(x=>x.type==='night').length*ng;
+ let paid=payments.reduce((s,p)=>s+p.amt,0);
+ dashBill.innerText=bill; dashPaid.innerText=paid; dashDue.innerText=bill-paid;
+ let map={}; payments.forEach(p=>{ map[p.payer]=(map[p.payer]||0)+p.amt; });
+ payerReport.innerHTML=Object.entries(map).map(([k,v])=>`<div class="item"><span>${k}</span><b style="color:var(--green)">${v} Tk</b> <span class="status ${bill<=paid?'paid':'due'}">${bill<=v?'PAID':'DUE'}</span></div>`).join('')||'<small>No payments</small>';
+ // monthly report
+ let months={}; data.forEach(d=>{ let m=d.date.slice(0,7); months[m]=months[m]||{full:0,noon:0,night:0}; months[m][d.type]++; });
+ monthlyReport.innerHTML=Object.entries(months).sort().reverse().map(([m,v])=>{
+   let b=v.full*f+v.noon*n+v.night*ng; return `<div class="item"><span>${m}</span><span>Full:${v.full} Noon:${v.noon} Night:${v.night} = <b style="color:var(--red)">${b} Tk</b></span></div>`
+ }).join('')||'<small>No data</small>';
+}
+
+// GPAY + PDF + WA
+function saveReceiver(){ receiverInfo={upi:receiverUPI.value.trim(), name:receiverUPIName.value.trim()||'Receiver', phone:receiverBillPhone.value.trim().replace(/[^0-9]/g,'')}; localStorage.setItem('millReceiverInfo',JSON.stringify(receiverInfo)); toast('✅ Saved');}
+function payWithGPay(){
+ let f=+fullRate.value, n=+noonRate.value, ng=+nightRate.value;
+ let bill=data.filter(x=>x.type==='full').length*f + data.filter(x=>x.type==='noon').length*n + data.filter(x=>x.type==='night').length*ng;
+ let paid=payments.reduce((s,p)=>s+p.amt,0); let due=bill-paid; if(due<=0) return toast('No due');
+ if(!receiverInfo.upi){ toast('Set UPI in Data tab'); switchTab('set'); return; }
+ pendingPay=due; modalAmount.innerText=`Pay ${due} Tk to ${receiverInfo.name}`;
+ let upi=`upi://pay?pa=${encodeURIComponent(receiverInfo.upi)}&pn=${encodeURIComponent(receiverInfo.name)}&am=${due}&cu=INR&tn=MillBill`;
+ window.location.href=upi; setTimeout(()=>{ document.getElementById('gpayModal').style.display='flex'; },1200);
+}
+function closeGPay(){ document.getElementById('gpayModal').style.display='none'; }
+function confirmPayment(){
+ closeGPay(); let amt=pendingPay;
+ payments.push({id:Date.now(),payer:'You (GPay)',receiver:receiverInfo.name,pPhone:'',rPhone:receiverInfo.phone,amt,d:new Date().toISOString().slice(0,10),note:'GPay'}); saveAll(); renderPayments(); updateDash(); toast('✅ Payment confirmed'); generatePDF(true);
+}
+
+function generatePDF(sendWA=false){
+ const {jsPDF}=window.jspdf; let doc=new jsPDF();
+ let f=+fullRate.value, n=+noonRate.value, ng=+nightRate.value;
+ let fc=data.filter(x=>x.type==='full').length, nc=data.filter(x=>x.type==='noon').length, ngc=data.filter(x=>x.type==='night').length;
+ let bill=fc*f+nc*n+ngc*ng, paid=payments.reduce((s,p)=>s+p.amt,0), due=bill-paid;
+ // header
+ doc.setFillColor(22,163,74); doc.rect(0,0,210,32,'F'); doc.setFillColor(220,38,38); doc.rect(0,28,210,4,'F');
+ doc.setTextColor(255,255,255); doc.setFontSize(18); doc.text('MILL COUNTER - PROFESSIONAL INVOICE',10,20);
+ doc.setFontSize(10); doc.text(`Date: ${new Date().toLocaleString()} | Receiver: ${receiverInfo.name||'N/A'}`,10,26);
+ doc.setTextColor(0,0,0); let y=42;
+ doc.setFontSize(12); doc.setFont(undefined,'bold'); doc.text('Billing Summary:',10,y); y+=7; doc.setFont(undefined,'normal'); doc.setFontSize(10);
+ doc.text(`Full: ${fc} x ${f} = ${fc*f} Tk`,10,y); y+=5; doc.text(`Noon: ${nc} x ${n} = ${nc*n} Tk`,10,y); y+=5; doc.text(`Night: ${ngc} x ${ng} = ${ngc*ng} Tk`,10,y); y+=7;
+ doc.setFontSize(13); doc.setTextColor(220,38,38); doc.text(`Total Bill: ${bill} Tk | Paid: ${paid} Tk | Due: ${due} Tk | Status: ${due<=0?'PAID ✅':'DUE ❌'}`,10,y); y+=10;
+ doc.setTextColor(0,0,0); doc.setFontSize(11); doc.text('Mill Details:',10,y); y+=6; doc.setFontSize(9);
+ data.slice(-40).forEach(d=>{ if(y>275){doc.addPage(); y=15;} doc.text(`${d.date} - ${d.type.toUpperCase()}`,10,y); y+=5; });
+ y+=5; doc.setFontSize(11); doc.text('Payment History:',10,y); y+=6; doc.setFontSize(9);
+ payments.slice(-40).forEach(p=>{ if(y>275){doc.addPage(); y=15;} doc.text(`${p.d} - ${p.payer} -> ${p.receiver} : ${p.amt} Tk ${p.note}`,10,y); y+=5; });
+ doc.save(`Mill_Invoice_${new Date().toISOString().slice(0,10)}.pdf`);
+ if(sendWA && receiverInfo.phone){
+   let txt=`🧾 *Mill Invoice*\nBill:${bill} Tk Paid:${paid} Tk Due:${due} Tk\nFull:${fc} Noon:${nc} Night:${ngc}\nStatus:${due<=0?'PAID ✅':'DUE ❌'}\nPDF downloaded, please check files.`;
+   setTimeout(()=>{ window.open(`https://wa.me/${receiverInfo.phone}?text=${encodeURIComponent(txt)}`,'_blank'); },700);
+ }
+}
+
+function exportCSV(){
+ let csv="Type,Date,Type/Category,Amount,Note\n"; data.forEach(d=>csv+=`Mill,${d.date},${d.type},,\n`); payments.forEach(p=>csv+=`Payment,${p.d},${p.payer}->${p.receiver},${p.amt},${p.note}\n`);
+ let blob=new Blob([csv],{type:'text/csv'}); let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='mill_export.csv'; a.click(); toast('CSV Exported');
+}
+function exportJSON(){
+ let all={millDataV5:data, millPaymentsV2:payments, millReceiverInfo:receiverInfo, rates:{full:fullRate.value,noon:noonRate.value,night:nightRate.value}};
+ let blob=new Blob([JSON.stringify(all,null,2)],{type:'application/json'}); let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='mill_backup.json'; a.click(); toast('JSON Exported');
+}
+function importJSON(e){
+ let file=e.target.files[0]; if(!file) return; let r=new FileReader(); r.onload=(ev)=>{
+   try{ let j=JSON.parse(ev.target.result); if(j.millDataV5) data=j.millDataV5; if(j.millPaymentsV2) payments=j.millPaymentsV2; if(j.millReceiverInfo) receiverInfo=j.millReceiverInfo; saveAll(); localStorage.setItem('millReceiverInfo',JSON.stringify(receiverInfo)); location.reload(); }catch{ toast('Invalid JSON'); }
+ }; r.readAsText(file);
+}
+function clearAllData(){ if(confirm('⚠️ Delete ALL data? This cannot be undone!') && confirm('Are you REALLY sure?')){ localStorage.clear(); location.reload(); } }
+function shareWhatsApp(){
+ let f=+fullRate.value, n=+noonRate.value, ng=+nightRate.value;
+ let bill=data.filter(x=>x.type==='full').length*f + data.filter(x=>x.type==='noon').length*n + data.filter(x=>x.type==='night').length*ng;
+ let paid=payments.reduce((s,p)=>s+p.amt,0);
+ let txt=`📊 *Mill Summary*\nBill:${bill} Paid:${paid} Due:${bill-paid}\nFull:${data.filter(x=>x.type==='full').length} Noon:${data.filter(x=>x.type==='noon').length} Night:${data.filter(x=>x.type==='night').length}\nGenerated via Mill Counter PRO`;
+ window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`,'_blank');
+}
+
+// PWA install
+let deferredPrompt=null; window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); deferredPrompt=e; document.getElementById('installBtn').style.display='inline-block'; });
+function installPWA(){ if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt.userChoice.then(()=>{ deferredPrompt=null; document.getElementById('installBtn').style.display='none'; }); } }
+
+fullRate.oninput=noonRate.oninput=nightRate.oninput=()=>{saveAll(); updateUI(); updateDash();};
+dateEl.onchange=()=>updateUI(); filterFrom.onchange=filterTo.onchange=()=>updateUI();
+updateUI(); renderPayments(); updateDash();
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('data:text/javascript;base64,'+btoa('self.addEventListener("fetch",e=>{});')); }
 </script>
 </body>
 </html>
