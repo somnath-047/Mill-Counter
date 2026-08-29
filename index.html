@@ -3,225 +3,187 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mill Counter ULTIMATE</title>
+<title>Mill Counter - Green Red</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
-body{background:#f0fdf4;padding:12px;color:#111;min-height:100vh}
-.container{max-width:580px;margin:auto}
-h1{text-align:center;margin:12px 0;font-size:25px;color:#15803d;font-weight:900}
+body{background:#f0fdf4;padding:15px;min-height:100vh}
+.container{max-width:520px;margin:auto}
+h1{text-align:center;margin:12px 0 15px;font-size:26px;color:#15803d;font-weight:900}
 h1 span{color:#dc2626}
-.card{background:#fff;border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:0 4px 18px #00000010;border:1px solid #e5e7eb}
-h3{margin-bottom:10px;font-size:15px;color:#14532d;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-.tabs{display:flex;background:#fff;padding:5px;border-radius:14px;margin-bottom:12px;gap:5px}
-.tab{flex:1;padding:10px;text-align:center;border-radius:10px;font-weight:700;cursor:pointer;color:#6b7280;font-size:13px}
-.tab.active{background:#16a34a;color:#fff}
-.tab.active.red{background:#dc2626;color:#fff}
-input,select{width:100%;padding:11px;border:1.5px solid #d1d5db;border-radius:11px;background:#f9fafb;font-size:13px;outline:none}
+.card{background:#fff;border-radius:20px;padding:18px;margin-bottom:14px;box-shadow:0 4px 20px #0001;border:1px solid #e5e7eb}
+h3{margin-bottom:10px;font-size:16px;color:#14532d;display:flex;justify-content:space-between;align-items:center}
+.tabs{display:flex;background:#fff;padding:6px;border-radius:14px;margin-bottom:14px;gap:6px;box-shadow:0 2px 10px #0001}
+.tab{flex:1;padding:11px;text-align:center;border-radius:10px;font-weight:700;cursor:pointer;color:#6b7280;font-size:13px}
+.tab.active{background:#16a34a;color:#fff}.tab.active.red{background:#dc2626;color:#fff}
+input{width:100%;padding:12px;border:1.5px solid #d1d5db;border-radius:12px;background:#f9fafb;font-size:14px;outline:none;margin-bottom:8px}
 input:focus{border-color:#16a34a}
 .rates{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
 .btns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .btns-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-button{padding:11px;border:none;border-radius:11px;font-size:13px;font-weight:700;cursor:pointer}
+button{padding:12px;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer}
 .btn-full{background:#16a34a;color:#fff}.btn-noon{background:#f59e0b;color:#fff}.btn-night{background:#dc2626;color:#fff}
-.btn-undo{background:#fee2e2;color:#dc2626}.btn-reset{background:#f3f4f6;color:#6b7280}
-.btn-pay{background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;width:100%;margin-top:10px}
+.btn-undo{background:#fee2e2;color:#dc2626}.btn-reset{background:#f3f4f6;color:#666}
+.btn-pay{background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;width:100%;box-shadow:0 4px 12px #16a34a40}
 .btn-pdf{background:linear-gradient(135deg,#dc2626,#991b1b);color:#fff;width:100%;margin-top:8px}
-.box-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
-.box{background:#f0fdf4;padding:12px;border-radius:12px;border:1px solid #bbf7d0}
-.box.red{background:#fef2f2;border-color:#fecaca}.box h2{font-size:18px}
-.item{display:flex;justify-content:space-between;align-items:center;background:#f9fafb;padding:10px;border-radius:11px;margin-bottom:7px;border:1px solid #f3f4f6;font-size:13px}
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.box{background:#f0fdf4;padding:12px;border-radius:12px;border:1px solid #bbf7d0}.box.red{background:#fef2f2;border-color:#fecaca}.box h2{font-size:20px;color:#15803d}.box.red h2{color:#dc2626}
+.total{font-size:20px;text-align:center;margin-top:12px;font-weight:800}
+.item{display:flex;justify-content:space-between;align-items:center;background:#f9fafb;padding:11px;border-radius:11px;margin-bottom:7px;border:1px solid #f3f4f6;font-size:13px}
 .badge{padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700}
 .badge-full{background:#dcfce7;color:#166534}.badge-noon{background:#fef3c7;color:#92400e}.badge-night{background:#fee2e2;color:#991b1b}
-.search{width:100%;margin-bottom:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.wa{font-size:11px;background:#25D366;color:#fff;padding:5px 8px;border-radius:7px;text-decoration:none}
 .hidden{display:none}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
-.wa{font-size:10px;background:#25D366;color:#fff;padding:4px 7px;border-radius:6px;text-decoration:none}
-.member-tag{display:inline-block;background:#16a34a;color:#fff;padding:4px 10px;border-radius:20px;font-size:12px;margin:3px}
-.member-tag span{cursor:pointer;margin-left:6px;font-weight:900}
-#toast{position:fixed;bottom:15px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:10px;display:none;z-index:999}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:11px 16px;border-radius:10px;display:none;z-index:999}
 </style>
 </head>
 <body>
 <div class="container">
-<h1>📊 Mill <span>ULTIMATE</span></h1>
+<h1>📊 Mill <span>Counter</span></h1>
 
 <div class="tabs">
-<div class="tab active" onclick="switchTab('mill')" id="tMill">Mill</div>
-<div class="tab red" onclick="switchTab('pay')" id="tPay">Payments</div>
-<div class="tab" onclick="switchTab('member')" id="tMember">Members</div>
-<div class="tab" onclick="switchTab('dash')" id="tDash">Report</div>
+<div class="tab active" id="tMill" onclick="switchTab('mill')">Mill</div>
+<div class="tab red" id="tPay" onclick="switchTab('pay')">Payments</div>
+<div class="tab" id="tDash" onclick="switchTab('dash')">Report</div>
 </div>
 
-<!-- MEMBERS -->
-<div id="viewMember" class="hidden">
-<div class="card">
-<h3>Add Member</h3>
-<div class="grid2">
-<input type="text" id="mName" placeholder="Name (ex: Rafi)">
-<input type="tel" id="mPhone" placeholder="WhatsApp 8801...">
-</div>
-<button class="btn-pay" onclick="addMember()">+ Add Member</button>
-<div id="memberList" style="margin-top:12px"></div>
-</div>
-</div>
-
-<!-- MILL -->
+<!-- MILL VIEW -->
 <div id="viewMill">
 <div class="card">
 <h3>Set Rates</h3>
 <div class="rates">
 <input type="number" id="fullRate" value="100"><input type="number" id="noonRate" value="70"><input type="number" id="nightRate" value="50">
 </div>
-<select id="millMember" style="margin-bottom:8px"></select>
-<input type="date" id="date" style="margin-bottom:8px">
+<input type="date" id="date">
 <div class="btns">
 <button class="btn-full" id="btnFull" onclick="add('full')">+ Full</button>
 <button class="btn-noon" id="btnNoon" onclick="add('noon')">+ Noon</button>
 <button class="btn-night" id="btnNight" onclick="add('night')">+ Night</button>
 </div>
-<div class="btns-2"><button class="btn-undo" onclick="undo()">Undo</button><button class="btn-reset" onclick="resetMill()">Reset Mill</button></div>
+<div class="btns-2"><button class="btn-undo" onclick="undo()">↩ Undo</button><button class="btn-reset" onclick="resetMill()">🗑 Reset</button></div>
 </div>
-<div class="card"><h3>This Month Total: <span id="totalAmount" style="color:#dc2626">0</span> Tk</h3><div class="box-grid"><div class="box"><h2 id="fullCount">0</h2><p>Full</p></div><div class="box"><h2 id="noonCount">0</h2><p>Noon</p></div><div class="box red"><h2 id="nightCount">0</h2><p>Night</p></div></div></div>
-<div class="card"><input type="text" id="searchMill" placeholder="🔍 Search mill..." class="search" oninput="updateUI()"><div id="history"></div></div>
+<div class="card"><h3>Summary</h3><div class="summary"><div class="box"><h2 id="fullCount">0</h2><p>Full</p></div><div class="box"><h2 id="noonCount">0</h2><p>Noon</p></div><div class="box red"><h2 id="nightCount">0</h2><p>Night</p></div></div><div class="total">Total Bill: <span id="totalAmount" style="color:#dc2626">0</span> Tk</div></div>
+<div class="card"><h3>Mill History</h3><input type="text" id="searchMill" placeholder="🔍 Search by date or type..." oninput="updateUI()"><div id="history"></div></div>
 </div>
 
-<!-- PAY -->
+<!-- PAY VIEW -->
 <div id="viewPay" class="hidden">
 <div class="card" style="border-top:4px solid #dc2626">
-<h3>Add Payment</h3>
-<div class="grid2"><select id="payerName"></select><select id="receiverName"></select></div>
+<h3 style="color:#dc2626">Add Payment</h3>
+<div class="grid2"><input type="text" id="payerName" placeholder="Payer Name"><input type="text" id="receiverName" placeholder="Receiver Name"></div>
+<div class="grid2"><input type="tel" id="payerPhone" placeholder="Payer WhatsApp 8801..."><input type="tel" id="receiverPhone" placeholder="Receiver WhatsApp"></div>
 <div class="grid2"><input type="number" id="payAmount" placeholder="Amount Tk"><input type="date" id="payDate"></div>
-<input type="text" id="payNote" placeholder="Note" style="margin-bottom:8px">
-<button class="btn-pay" onclick="addPayment()">💸 Add & Send WhatsApp to Both</button>
+<input type="text" id="payNote" placeholder="Note (ex: June bill)">
+<button class="btn-pay" onclick="addPayment()">💸 Save & Send WhatsApp to Both</button>
 </div>
-<div class="card"><input type="text" id="searchPay" placeholder="🔍 Search payments..." class="search" oninput="renderPayments()"><div id="paymentHistory"></div></div>
+<div class="card"><h3>Payment History</h3><input type="text" id="searchPay" placeholder="🔍 Search payer / receiver..." oninput="renderPayments()"><div id="paymentHistory"></div></div>
 </div>
 
-<!-- DASH -->
+<!-- REPORT VIEW -->
 <div id="viewDash" class="hidden">
 <div class="card">
-<h3>Overall</h3>
-<div class="box-grid"><div class="box"><h2 id="dashBill">0</h2><p>Bill</p></div><div class="box"><h2 id="dashPaid" style="color:#15803d">0</h2><p>Paid</p></div><div class="box red"><h2 id="dashDue">0</h2><p>Due</p></div></div>
-<button class="btn-pdf" onclick="generatePDF()">📄 Download Monthly PDF Bill</button>
-<button class="btn-pay" style="background:#111" onclick="exportCSV()">📤 Export CSV</button>
+<h3>Monthly Report</h3>
+<div class="summary"><div class="box"><h2 id="dashBill">0</h2><p>Bill</p></div><div class="box"><h2 id="dashPaid" style="color:#15803d">0</h2><p>Paid</p></div><div class="box red"><h2 id="dashDue">0</h2><p>Due</p></div></div>
+<button class="btn-pdf" onclick="generatePDF()">📄 Download PDF Bill</button>
+<button class="btn-pay" style="background:#111;margin-top:8px" onclick="exportCSV()">📤 Export CSV</button>
 </div>
-<div class="card"><h3>Member-wise Due Report</h3><div id="memberReport"></div></div>
+<div class="card"><h3>Payer-wise Paid</h3><div id="payerReport"></div></div>
 </div>
 
 </div>
 <div id="toast"></div>
+
 <script>
 let data=JSON.parse(localStorage.getItem('millDataV5')||'[]');
 let payments=JSON.parse(localStorage.getItem('millPaymentsV2')||'[]');
-let members=JSON.parse(localStorage.getItem('millMembersV1')||'[]');
 const dateEl=document.getElementById('date'), payDateEl=document.getElementById('payDate');
 dateEl.valueAsDate=new Date(); payDateEl.valueAsDate=new Date();
 
-function toast(m){let t=document.getElementById('toast');t.innerText=m;t.style.display='block';setTimeout(()=>t.style.display='none',2200);}
-function saveAll(){localStorage.setItem('millDataV5',JSON.stringify(data));localStorage.setItem('millPaymentsV2',JSON.stringify(payments));localStorage.setItem('millMembersV1',JSON.stringify(members));}
 function switchTab(t){
- ['mill','pay','member','dash'].forEach(x=>document.getElementById('view'+x.charAt(0).toUpperCase()+x.slice(1)).classList.toggle('hidden',x!==t));
- ['tMill','tPay','tMember','tDash'].forEach(x=>document.getElementById(x).classList.remove('active'));
- document.getElementById('t'+t.charAt(0).toUpperCase()+t.slice(1)).classList.add('active'); if(t==='dash') updateDash();
+ document.getElementById('viewMill').classList.toggle('hidden',t!=='mill');
+ document.getElementById('viewPay').classList.toggle('hidden',t!=='pay');
+ document.getElementById('viewDash').classList.toggle('hidden',t!=='dash');
+ document.getElementById('tMill').classList.toggle('active',t==='mill');
+ document.getElementById('tPay').classList.toggle('active',t==='pay');
+ document.getElementById('tDash').classList.toggle('active',t==='dash');
+ if(t==='dash') updateDash();
 }
+function toast(m){ let t=document.getElementById('toast'); t.innerText=m; t.style.display='block'; setTimeout(()=>t.style.display='none',2200); }
+function save(){ localStorage.setItem('millDataV5',JSON.stringify(data)); updateUI(); updateDash(); }
+function savePay(){ localStorage.setItem('millPaymentsV2',JSON.stringify(payments)); renderPayments(); updateDash(); }
 
-// MEMBERS
-function addMember(){
- let n=mName.value.trim(), p=mPhone.value.trim().replace(/[^0-9]/g,'');
- if(!n) return toast('Enter name'); if(members.find(m=>m.name.toLowerCase()===n.toLowerCase())) return toast('Member exists');
- members.push({name:n,phone:p}); saveAll(); mName.value=''; mPhone.value=''; renderMembers(); toast('Member added');
-}
-function renderMembers(){
- document.getElementById('memberList').innerHTML=members.map((m,i)=>`<span class="member-tag">${m.name} <span onclick="delMember(${i})">×</span></span>`).join('')||'<small style="color:#999">No members yet</small>';
- let opts=members.map(m=>`<option value="${m.name}">${m.name}</option>`).join('');
- document.getElementById('millMember').innerHTML='<option value="">Select Member</option>'+opts;
- document.getElementById('payerName').innerHTML='<option value="">Payer</option>'+opts;
- document.getElementById('receiverName').innerHTML='<option value="">Receiver</option>'+opts;
-}
-function delMember(i){ if(confirm('Delete '+members[i].name+'?')){ members.splice(i,1); saveAll(); renderMembers(); } }
-
-// MILL
 function add(type){
- let mem=millMember.value; if(!mem) return toast('Select member first!');
- let sel=dateEl.value; if(data.find(x=>x.date===sel && x.member===mem)) return toast('Already added for '+mem);
- data.push({date:sel,type:type,member:mem,ts:Date.now()}); saveAll(); updateUI(); toast(mem+' - '+type);
+ let sel=dateEl.value; if(data.find(x=>x.date===sel)){ toast('❌ Already entry on '+sel); return; }
+ data.push({date:sel,type:type,ts:Date.now()}); save(); toast('✅ '+type+' added');
 }
-function undo(){ if(!data.length) return toast('Nothing'); data.pop(); saveAll(); updateUI(); }
-function resetMill(){ if(confirm('Delete all mill?')){ data=[]; saveAll(); updateUI(); } }
+function undo(){ if(!data.length) return toast('Nothing to undo'); data.pop(); save(); toast('Undone'); }
+function resetMill(){ if(confirm('Delete all mill data?')){ data=[]; save(); } }
+
 function updateUI(){
  let f=+fullRate.value, n=+noonRate.value, ng=+nightRate.value;
- fullCount.innerText=data.filter(x=>x.type==='full').length;
- noonCount.innerText=data.filter(x=>x.type==='noon').length;
- nightCount.innerText=data.filter(x=>x.type==='night').length;
- totalAmount.innerText=data.filter(x=>x.type==='full').length*f + data.filter(x=>x.type==='noon').length*n + data.filter(x=>x.type==='night').length*ng;
+ let fc=data.filter(x=>x.type==='full').length, nc=data.filter(x=>x.type==='noon').length, ngc=data.filter(x=>x.type==='night').length;
+ fullCount.innerText=fc; noonCount.innerText=nc; nightCount.innerText=ngc; totalAmount.innerText=fc*f+nc*n+ngc*ng;
  let q=(searchMill.value||'').toLowerCase();
- let filtered=data.filter(x=>(x.date+x.type+x.member).toLowerCase().includes(q)).slice().reverse();
- history.innerHTML=filtered.map(x=>`<div class="item"><span><b>${x.member}</b> - ${x.date}</span><span class="badge badge-${x.type}">${x.type}</span></div>`).join('')||'<p style="text-align:center;color:#999">No data</p>';
- let existing=data.find(x=>x.date===dateEl.value && x.member===millMember.value);
- btnFull.disabled=btnNoon.disabled=btnNight.disabled=!!existing;
+ let filtered=data.filter(x=>(x.date+x.type).toLowerCase().includes(q)).slice().reverse();
+ history.innerHTML=filtered.map(x=>`<div class="item"><span>${x.date}</span><span class="badge badge-${x.type}">${x.type.toUpperCase()}</span></div>`).join('')||'<p style="text-align:center;color:#999">No data</p>';
+ let ex=data.find(x=>x.date===dateEl.value); btnFull.disabled=btnNoon.disabled=btnNight.disabled=!!ex;
 }
 
-// PAYMENTS
 function addPayment(){
- let payer=payerName.value, receiver=receiverName.value, amt=+payAmount.value, d=payDate.value, note=payNote.value;
- if(!payer||!receiver||!amt||!d) return toast('Fill all fields');
- let pObj=members.find(m=>m.name===payer), rObj=members.find(m=>m.name===receiver);
- let entry={id:Date.now(),payer,receiver,pPhone:pObj?.phone||'',rPhone:rObj?.phone||'',amt,d,note}; payments.push(entry); saveAll(); renderPayments(); updateDash(); toast('Payment added');
- let msgP=`✅ Payment: You paid ${amt} Tk to ${receiver} on ${d}. Note: ${note}`;
- let msgR=`💰 Received: You got ${amt} Tk from ${payer} on ${d}. Note: ${note}`;
- if(entry.pPhone) window.open(`https://wa.me/${entry.pPhone}?text=${encodeURIComponent(msgP)}`,'_blank');
- setTimeout(()=>{ if(entry.rPhone) window.open(`https://wa.me/${entry.rPhone}?text=${encodeURIComponent(msgR)}`,'_blank'); },1200);
- payAmount.value=payNote.value='';
+ let payer=payerName.value.trim(), receiver=receiverName.value.trim();
+ let pPhone=payerPhone.value.trim().replace(/[^0-9]/g,''), rPhone=receiverPhone.value.trim().replace(/[^0-9]/g,'');
+ let amt=+payAmount.value, d=payDate.value, note=payNote.value.trim();
+ if(!payer||!receiver||!amt||!d){ toast('❌ Fill payer, receiver, amount, date'); return; }
+ let entry={id:Date.now(),payer,receiver,pPhone,rPhone,amt,d,note}; payments.push(entry); savePay();
+ payerName.value=receiverName.value=payerPhone.value=receiverPhone.value=payAmount.value=payNote.value=''; toast('✅ Payment saved');
+
+ let msgP=`✅ *Payment Confirmation*\nHi ${payer}, you paid ${amt} Tk to ${receiver} on ${d}.\nNote: ${note}\nTotal Mill Bill will be updated.\n- Mill Counter`;
+ let msgR=`💰 *Payment Received*\nHi ${receiver}, you received ${amt} Tk from ${payer} on ${d}.\nNote: ${note}\n- Mill Counter`;
+ if(pPhone) window.open(`https://wa.me/${pPhone}?text=${encodeURIComponent(msgP)}`,'_blank');
+ setTimeout(()=>{ if(rPhone) window.open(`https://wa.me/${rPhone}?text=${encodeURIComponent(msgR)}`,'_blank'); },1300);
 }
+
 function renderPayments(){
  let q=(searchPay.value||'').toLowerCase();
- let filtered=payments.filter(p=>(p.payer+p.receiver+p.d).toLowerCase().includes(q)).slice().reverse();
- paymentHistory.innerHTML=filtered.map(p=>`<div class="item"><div><b>${p.payer}</b>→<b>${p.receiver}</b><br><small>${p.d}</small></div><div style="text-align:right"><b style="color:#16a34a">${p.amt} Tk</b><br><a class="wa" href="https://wa.me/${p.pPhone}?text=${encodeURIComponent('Payment '+p.amt)}" target="_blank">Payer WA</a> <a class="wa" style="background:#dc2626" href="https://wa.me/${p.rPhone}?text=${encodeURIComponent('Received '+p.amt)}" target="_blank">Recv WA</a></div></div>`).join('')||'<p style="text-align:center;color:#999">No payments</p>';
+ let filtered=payments.filter(p=>(p.payer+p.receiver+p.d+(p.note||'')).toLowerCase().includes(q)).slice().reverse();
+ paymentHistory.innerHTML=filtered.map(p=>`<div class="item"><div><b>${p.payer}</b> → <b>${p.receiver}</b><br><small>${p.d} | ${p.note||''}</small></div><div style="text-align:right"><b style="color:#16a34a">${p.amt} Tk</b><br><a class="wa" href="https://wa.me/${p.pPhone}?text=${encodeURIComponent('Paid '+p.amt+' Tk')}" target="_blank">Payer WA</a> <a class="wa" style="background:#dc2626" href="https://wa.me/${p.rPhone}?text=${encodeURIComponent('Received '+p.amt+' Tk')}" target="_blank">Recv WA</a></div></div>`).join('')||'<p style="text-align:center;color:#999">No payments</p>';
 }
 
-// DASH + PDF
 function updateDash(){
  let f=+fullRate.value, n=+noonRate.value, ng=+nightRate.value;
- let totalBill=data.length? data.filter(x=>x.type==='full').length*f + data.filter(x=>x.type==='noon').length*n + data.filter(x=>x.type==='night').length*ng : 0;
- let totalPaid=payments.reduce((s,p)=>s+p.amt,0);
- dashBill.innerText=totalBill; dashPaid.innerText=totalPaid; dashDue.innerText=totalBill-totalPaid;
- // member wise
- let report={}; members.forEach(m=>{ report[m.name]={mill:0,bill:0,paid:0}; });
- data.forEach(d=>{ if(!report[d.member]) report[d.member]={mill:0,bill:0,paid:0}; report[d.member].mill++; let cost=d.type==='full'?f:d.type==='noon'?n:ng; report[d.member].bill+=cost; });
- payments.forEach(p=>{ if(!report[p.payer]) report[p.payer]={mill:0,bill:0,paid:0}; report[p.payer].paid+=p.amt; });
- document.getElementById('memberReport').innerHTML=Object.entries(report).map(([name,r])=>`<div class="item"><div><b>${name}</b><br><small>Mill: ${r.mill} | Bill: ${r.bill} Tk | Paid: ${r.paid} Tk</small></div><div><b style="color:${r.bill-r.paid>0?'#dc2626':'#16a34a'}">${r.bill-r.paid} Due</b></div></div>`).join('')||'<small>No data</small>';
+ let bill=data.filter(x=>x.type==='full').length*f + data.filter(x=>x.type==='noon').length*n + data.filter(x=>x.type==='night').length*ng;
+ let paid=payments.reduce((s,p)=>s+p.amt,0);
+ dashBill.innerText=bill; dashPaid.innerText=paid; dashDue.innerText=bill-paid;
+ let map={}; payments.forEach(p=>{ map[p.payer]=(map[p.payer]||0)+p.amt; });
+ payerReport.innerHTML=Object.entries(map).map(([k,v])=>`<div class="item"><span>${k}</span><b style="color:#16a34a">${v} Tk paid</b></div>`).join('')||'<small style="color:#999">No payments yet</small>';
 }
 
 function generatePDF(){
  const {jsPDF}=window.jspdf; let doc=new jsPDF();
+ doc.setFillColor(22,163,74); doc.rect(0,0,210,28,'F'); doc.setTextColor(255,255,255); doc.setFontSize(16); doc.text('Mill Counter - Green Red Bill',10,18);
+ doc.setTextColor(0,0,0); doc.setFontSize(10); let y=38;
  let f=+fullRate.value, n=+noonRate.value, ng=+nightRate.value;
- doc.setFillColor(22,163,74); doc.rect(0,0,210,30,'F');
- doc.setTextColor(255,255,255); doc.setFontSize(18); doc.text('Mill Counter - Monthly Bill',10,18);
- doc.setFontSize(11); doc.text('Generated: '+new Date().toLocaleDateString(),10,24);
- let y=40; doc.setTextColor(0,0,0); doc.setFontSize(12); doc.text('Rates: Full='+f+' Noon='+n+' Night='+ng,10,y); y+=8;
- doc.setFontSize(13); doc.setTextColor(220,38,38); doc.text('Member-wise Report:',10,y); y+=8; doc.setTextColor(0,0,0); doc.setFontSize(10);
- let report={}; members.forEach(m=>{ report[m.name]={mill:0,bill:0,paid:0}; });
- data.forEach(d=>{ if(!report[d.member]) report[d.member]={mill:0,bill:0,paid:0}; report[d.member].mill++; let cost=d.type==='full'?f:d.type==='noon'?n:ng; report[d.member].bill+=cost; });
- payments.forEach(p=>{ if(!report[p.payer]) report[p.payer]={mill:0,bill:0,paid:0}; report[p.payer].paid+=p.amt; });
- Object.entries(report).forEach(([name,r])=>{
-  if(y>270){ doc.addPage(); y=20; }
-  doc.text(`${name} - Mill:${r.mill} Bill:${r.bill} Paid:${r.paid} Due:${r.bill-r.paid}`,10,y); y+=7;
- });
- y+=5; doc.setFontSize(12); doc.setTextColor(22,163,74);
- let totalBill=Object.values(report).reduce((s,r)=>s+r.bill,0), totalPaid=Object.values(report).reduce((s,r)=>s+r.paid,0);
- doc.text(`TOTAL Bill: ${totalBill} Tk | Paid: ${totalPaid} Tk | Due: ${totalBill-totalPaid} Tk`,10,y);
- doc.save(`Mill_Bill_${new Date().toISOString().slice(0,10)}.pdf`);
- toast('PDF Downloaded!');
+ let fc=data.filter(x=>x.type==='full').length, nc=data.filter(x=>x.type==='noon').length, ngc=data.filter(x=>x.type==='night').length;
+ let bill=fc*f+nc*n+ngc*ng, paid=payments.reduce((s,p)=>s+p.amt,0);
+ doc.text(`Date: ${new Date().toLocaleDateString()} | Rates: Full=${f} Noon=${n} Night=${ng}`,10,y); y+=8;
+ doc.text(`Full: ${fc} | Noon: ${nc} | Night: ${ngc} | Total Bill: ${bill} Tk`,10,y); y+=8;
+ doc.setTextColor(220,38,38); doc.text(`Total Paid: ${paid} Tk | Due: ${bill-paid} Tk`,10,y); y+=10;
+ doc.setTextColor(0,0,0); doc.text('Mill History:',10,y); y+=6;
+ data.slice(-30).forEach(d=>{ if(y>270){ doc.addPage(); y=15; } doc.text(`${d.date} - ${d.type}`,10,y); y+=5; });
+ y+=5; doc.text('Payments:',10,y); y+=6;
+ payments.slice(-30).forEach(p=>{ if(y>270){ doc.addPage(); y=15; } doc.text(`${p.d} - ${p.payer} -> ${p.receiver} : ${p.amt} Tk (${p.note||''})`,10,y); y+=5; });
+ doc.save(`Mill_Bill_${new Date().toISOString().slice(0,10)}.pdf`); toast('PDF Downloaded!');
 }
 
 function exportCSV(){
- let csv="Type,Date,Member,Amount\n"; data.forEach(d=>csv+=`Mill,${d.date},${d.member},${d.type}\n`); payments.forEach(p=>csv+=`Payment,${p.d},${p.payer}->${p.receiver},${p.amt}\n`);
+ let csv="Type,Date,Info,Amount\n"; data.forEach(d=>csv+=`Mill,${d.date},${d.type},\n`); payments.forEach(p=>csv+=`Payment,${p.d},${p.payer}->${p.receiver} (${p.note}),${p.amt}\n`);
  let blob=new Blob([csv],{type:'text/csv'}); let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='mill_report.csv'; a.click();
 }
 
-fullRate.oninput=noonRate.oninput=nightRate.oninput=()=>{updateUI();updateDash();};
-renderMembers(); updateUI(); renderPayments(); updateDash();
+fullRate.oninput=noonRate.oninput=nightRate.oninput=()=>{updateUI(); updateDash();};
+dateEl.onchange=updateUI;
+updateUI(); renderPayments(); updateDash();
 </script>
 </body>
 </html>
