@@ -352,6 +352,37 @@
   </div>
 </div>
 
+<!-- UPI fallback modal (shown if no UPI app intercepted the deep link) -->
+<div class="overlay" id="upiFallbackOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>Pay manually</h2>
+      <button class="icon-btn" onclick="closeUpiFallback()" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <p style="font-size:13px;color:var(--ink-600);margin-bottom:16px;line-height:1.5">
+      No UPI app opened automatically. This happens if you're testing on a desktop browser, inside an embedded preview, or don't have a UPI app installed. Open this page directly in a mobile browser tab, or pay manually with the details below.
+    </p>
+    <div class="field"><label>Pay to (UPI ID)</label>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="fbUpiId" readonly style="flex:1;padding:12px 14px;border:1.5px solid var(--line);border-radius:var(--radius-sm);background:var(--cream-100);font-size:15px">
+        <button class="ghost-btn" style="width:70px" onclick="copyText(document.getElementById('fbUpiId').innerText,'UPI ID')">Copy</button>
+      </div>
+    </div>
+    <div class="field"><label>Amount</label>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="fbAmount" readonly style="flex:1;padding:12px 14px;border:1.5px solid var(--line);border-radius:var(--radius-sm);background:var(--cream-100);font-size:15px">
+        <button class="ghost-btn" style="width:70px" onclick="copyText(document.getElementById('fbAmount').innerText,'Amount')">Copy</button>
+      </div>
+    </div>
+    <div class="field"><label>Payee name</label>
+      <input type="text" id="fbPayee" readonly style="width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:var(--radius-sm);background:var(--cream-100);font-size:15px">
+    </div>
+    <button class="save-btn" onclick="payViaUpi()">Try Opening UPI App Again</button>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -515,7 +546,7 @@ dateEl.onchange = render;
 /* ---------- UPI payment ---------- */
 function payViaUpi(){
   const total = monthEntries().reduce((sum,x) => sum + x.rate, 0);
-  if(total <= 0){ showToast('No amount to pay yet'); return; }
+  if(total <= 0){ showToast('No amount to pay yet — add an entry first'); return; }
   if(!settings.upiId){
     showToast('⚠️ Add your UPI ID in Settings first');
     openSettings();
@@ -525,7 +556,38 @@ function payViaUpi(){
   const note = encodeURIComponent(`Mill Counter Bill - ${monthLabel}`);
   const pn = encodeURIComponent(settings.payeeName || 'Mill Counter');
   const link = `upi://pay?pa=${encodeURIComponent(settings.upiId)}&pn=${pn}&am=${total}&cu=INR&tn=${note}`;
-  window.location.href = link;
+
+  // Anchor-click navigation is more reliable than location.href for custom
+  // URI schemes across mobile browsers.
+  const a = document.createElement('a');
+  a.href = link;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  // If no UPI app intercepts the link, the page stays put. Show a manual
+  // fallback after a short delay so the person is never stuck.
+  clearTimeout(window._upiFallbackTimer);
+  window._upiFallbackTimer = setTimeout(() => {
+    openUpiFallback(settings.upiId, total, settings.payeeName || 'Mill Counter');
+  }, 1200);
+}
+
+function openUpiFallback(upiId, amount, payeeName){
+  document.getElementById('fbUpiId').innerText = upiId;
+  document.getElementById('fbAmount').innerText = '₹' + fmtMoney(amount);
+  document.getElementById('fbPayee').innerText = payeeName;
+  document.getElementById('upiFallbackOverlay').classList.add('show');
+}
+function closeUpiFallback(){ document.getElementById('upiFallbackOverlay').classList.remove('show'); }
+function copyText(text, label){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(() => showToast('📋 ' + label + ' copied'))
+      .catch(() => showToast('Could not copy — long-press to select instead'));
+  } else {
+    showToast('Could not copy — long-press to select instead');
+  }
 }
 
 /* ---------- PDF / share ---------- */
