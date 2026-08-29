@@ -2,165 +2,634 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mill Counter</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Mill Counter Pro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
-body{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:15px;color:#fff;min-height:100vh}
-.container{max-width:500px;margin:auto}
-h1{text-align:center;margin:10px 0 20px;font-size:24px}
-.card{background:#ffffff22;backdrop-filter:blur(5px);border-radius:20px;padding:20px;margin-bottom:15px;overflow:hidden}
-h3{margin-bottom:12px;font-size:18px}
+  :root{
+    --yellow-500:#FFC107;
+    --yellow-600:#F2A900;
+    --amber-600:#FB8C00;
+    --red-600:#D6293E;
+    --red-700:#B71C2E;
+    --red-900:#7A1220;
+    --cream-50:#FFFCF5;
+    --cream-100:#FFF6E5;
+    --ink-900:#2B2118;
+    --ink-600:#6B5F52;
+    --line:#F0E2C8;
+    --white:#FFFFFF;
+    --radius-lg:20px;
+    --radius-md:14px;
+    --radius-sm:10px;
+    --shadow:0 8px 24px rgba(43,33,24,0.08);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--cream-50);
+    color:var(--ink-900);
+    min-height:100vh;
+    padding-bottom:96px;
+  }
+  .wrap{max-width:480px;margin:0 auto;padding:0 16px}
 
-.rates{display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;margin-bottom:15px}
-.rates input{width:100%;padding:12px;border:none;border-radius:12px;background:#ffffff33;color:#fff;font-size:16px}
-.rates input::placeholder{color:#eee}
+  /* Header */
+  header{
+    background:linear-gradient(135deg,var(--yellow-500) 0%,var(--amber-600) 100%);
+    padding:18px 16px 34px;
+    position:relative;
+    overflow:hidden;
+  }
+  header::after{
+    content:"";
+    position:absolute; right:-40px; top:-40px;
+    width:160px; height:160px; border-radius:50%;
+    background:rgba(255,255,255,0.15);
+  }
+  .header-row{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;max-width:480px;margin:0 auto}
+  .brand{display:flex;align-items:center;gap:10px}
+  .logo{
+    width:44px;height:44px;border-radius:13px;background:var(--ink-900);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    box-shadow:0 4px 10px rgba(0,0,0,0.2);
+  }
+  .brand-text h1{
+    font-family:'Poppins',sans-serif;font-size:19px;font-weight:700;color:var(--ink-900);line-height:1.1;
+  }
+  .brand-text .badge{
+    display:inline-block;margin-top:3px;background:var(--red-700);color:#fff;
+    font-family:'Poppins',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.06em;
+    padding:2px 7px;border-radius:6px;
+  }
+  .icon-btn{
+    width:40px;height:40px;border-radius:12px;border:none;
+    background:rgba(43,33,24,0.12);display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .icon-btn svg{stroke:var(--ink-900)}
 
-.btns{display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;margin-bottom:10px}
-.btns-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-button{padding:14px;border:none;border-radius:15px;font-size:15px;font-weight:600;cursor:pointer}
-button:disabled{opacity:0.4;cursor:not-allowed}
-.btn-full{background:#4CAF50;color:#fff}
-.btn-noon{background:#FF9800;color:#fff}
-.btn-night{background:#9C27B0;color:#fff}
-.btn-undo{background:#f44336;color:#fff}
-.btn-reset{background:#607D8B;color:#fff}
+  /* Month nav pulled up over header */
+  .month-nav{
+    max-width:448px;margin:-20px auto 0;background:var(--white);
+    border-radius:var(--radius-md);box-shadow:var(--shadow);
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 8px;position:relative;z-index:2;
+  }
+  .month-nav button{
+    width:36px;height:36px;border:none;background:var(--cream-100);border-radius:10px;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .month-nav button svg{stroke:var(--red-700)}
+  .month-label{font-family:'Poppins',sans-serif;font-weight:700;font-size:15px}
 
-.summary{display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;text-align:center}
-.box{background:#ffffff33;padding:15px;border-radius:15px}
-.box h2{font-size:24px;margin-bottom:4px}
-.total{font-size:28px;text-align:center;margin-top:15px;font-weight:700}
-.item{display:flex;justify-content:space-between;background:#ffffff22;padding:10px;border-radius:10px;margin-bottom:8px}
-.date-input{width:100%;padding:12px;border:none;border-radius:12px;margin-bottom:10px;background:#ffffff33;color:#fff}
-#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#000;padding:12px 18px;border-radius:10px;display:none;z-index:999}
+  main{max-width:480px;margin:0 auto;padding:16px}
+
+  .card{
+    background:var(--white);border-radius:var(--radius-lg);padding:18px;
+    margin-bottom:14px;box-shadow:var(--shadow);border:1px solid var(--line);
+  }
+  .card h3{font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;color:var(--ink-600);
+    text-transform:uppercase;letter-spacing:0.04em;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+  .card h3 .link-btn{font-size:11px;text-transform:none;letter-spacing:0;color:var(--red-700);font-weight:700;cursor:pointer;background:none;border:none}
+
+  /* Date + entry */
+  .date-input{
+    width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:var(--radius-sm);
+    background:var(--cream-100);color:var(--ink-900);font-family:'Inter',sans-serif;font-size:15px;margin-bottom:12px;
+  }
+  .btns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+  .shift-btn{
+    padding:14px 6px;border:none;border-radius:var(--radius-sm);color:#fff;
+    font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:4px;
+  }
+  .shift-btn small{font-family:'Inter',sans-serif;font-weight:500;font-size:11px;opacity:0.85}
+  .shift-btn:disabled{opacity:0.35;cursor:not-allowed}
+  .btn-full{background:linear-gradient(135deg,var(--yellow-500),var(--yellow-600))}
+  .btn-noon{background:linear-gradient(135deg,var(--amber-600),#E65100)}
+  .btn-night{background:linear-gradient(135deg,var(--red-600),var(--red-900))}
+  .btns-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .ghost-btn{
+    padding:11px;border-radius:var(--radius-sm);border:1.5px solid var(--line);background:var(--white);
+    color:var(--ink-600);font-family:'Poppins',sans-serif;font-weight:600;font-size:12.5px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:6px;
+  }
+  .ghost-btn svg{width:14px;height:14px;stroke:var(--ink-600)}
+
+  /* Summary */
+  .summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+  .box{background:var(--cream-100);padding:12px 6px;border-radius:var(--radius-sm);text-align:center}
+  .box .n{font-family:'Poppins',sans-serif;font-size:22px;font-weight:700}
+  .box .l{font-size:11px;color:var(--ink-600);margin-top:2px}
+  .full-dot{color:var(--yellow-600)} .noon-dot{color:var(--amber-600)} .night-dot{color:var(--red-700)}
+
+  .total-row{
+    display:flex;align-items:center;justify-content:space-between;
+    background:var(--ink-900);border-radius:var(--radius-md);padding:14px 16px;gap:12px;
+  }
+  .total-row .t-label{color:#D8CBB8;font-size:11px;text-transform:uppercase;letter-spacing:0.05em}
+  .total-row .t-amount{font-family:'Poppins',sans-serif;font-size:24px;font-weight:700;color:#fff}
+  .pay-btn{
+    background:linear-gradient(135deg,var(--red-600),var(--red-900));color:#fff;border:none;
+    padding:12px 16px;border-radius:12px;font-family:'Poppins',sans-serif;font-weight:700;font-size:13.5px;
+    display:flex;align-items:center;gap:7px;cursor:pointer;white-space:nowrap;
+    box-shadow:0 4px 12px rgba(214,41,62,0.4);
+  }
+
+  /* History */
+  .empty{text-align:center;color:var(--ink-600);font-size:13px;padding:20px 0}
+  .item{
+    display:flex;align-items:center;justify-content:space-between;padding:11px 4px;
+    border-bottom:1px solid var(--line);
+  }
+  .item:last-child{border-bottom:none}
+  .item-left{display:flex;align-items:center;gap:10px}
+  .type-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+  .dot-full{background:var(--yellow-500)} .dot-noon{background:var(--amber-600)} .dot-night{background:var(--red-700)}
+  .item-date{font-size:13.5px;font-weight:500}
+  .item-type{font-size:11px;color:var(--ink-600)}
+  .item-right{display:flex;align-items:center;gap:10px}
+  .item-amt{font-family:'Poppins',sans-serif;font-weight:600;font-size:13.5px}
+  .del-btn{background:none;border:none;cursor:pointer;padding:4px;display:flex}
+  .del-btn svg{width:15px;height:15px;stroke:#C7B9A5}
+
+  /* Floating action bar */
+  .fab-bar{
+    position:fixed;bottom:0;left:0;right:0;background:var(--white);
+    border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+    box-shadow:0 -4px 16px rgba(43,33,24,0.08);z-index:50;
+  }
+  .fab-inner{max-width:480px;margin:0 auto}
+  .share-btn{
+    width:100%;padding:14px;border:none;border-radius:14px;cursor:pointer;
+    background:linear-gradient(135deg,var(--yellow-500),var(--red-600));color:#fff;
+    font-family:'Poppins',sans-serif;font-weight:700;font-size:15px;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+
+  /* Modal */
+  .overlay{
+    position:fixed;inset:0;background:rgba(43,33,24,0.45);display:none;align-items:flex-end;
+    justify-content:center;z-index:100;
+  }
+  .overlay.show{display:flex}
+  .modal{
+    background:var(--white);width:100%;max-width:480px;border-radius:22px 22px 0 0;
+    padding:20px 20px calc(20px + env(safe-area-inset-bottom));max-height:85vh;overflow-y:auto;
+    animation:slideUp .25s ease;
+  }
+  @keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .modal-head h2{font-family:'Poppins',sans-serif;font-size:17px;font-weight:700}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:12px;color:var(--ink-600);margin-bottom:6px;font-weight:600}
+  .field input{
+    width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:var(--radius-sm);
+    background:var(--cream-100);font-size:15px;font-family:'Inter',sans-serif;
+  }
+  .rate-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .rate-grid .field{margin-bottom:0}
+  .save-btn{
+    width:100%;padding:14px;border:none;border-radius:14px;margin-top:6px;cursor:pointer;
+    background:var(--ink-900);color:#fff;font-family:'Poppins',sans-serif;font-weight:700;font-size:14.5px;
+  }
+  .share-option{
+    display:flex;align-items:center;gap:12px;padding:14px 6px;border:none;background:none;
+    width:100%;text-align:left;cursor:pointer;border-bottom:1px solid var(--line);
+  }
+  .share-option:last-child{border-bottom:none}
+  .share-icon{width:40px;height:40px;border-radius:12px;background:var(--cream-100);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .share-icon svg{stroke:var(--red-700)}
+  .share-option .so-title{font-family:'Poppins',sans-serif;font-weight:600;font-size:14px}
+  .share-option .so-sub{font-size:11.5px;color:var(--ink-600);margin-top:1px}
+
+  #toast{
+    position:fixed;bottom:100px;left:50%;transform:translateX(-50%);
+    background:var(--ink-900);color:#fff;padding:11px 18px;border-radius:12px;
+    font-size:13px;font-weight:500;display:none;z-index:200;box-shadow:0 6px 18px rgba(0,0,0,0.25);
+    max-width:85%;text-align:center;
+  }
 </style>
 </head>
 <body>
-<div class="container">
-<h1>📊 Mill Counter</h1>
 
-<div class="card">
-<h3>Set Rates</h3>
-<div class="rates">
-<input type="number" id="fullRate" value="100" placeholder="Full">
-<input type="number" id="noonRate" value="70" placeholder="Noon">
-<input type="number" id="nightRate" value="50" placeholder="Night">
-</div>
-<input type="date" id="date" class="date-input">
-<div class="btns">
-<button class="btn-full" id="btnFull" onclick="add('full')">+ Full Day</button>
-<button class="btn-noon" id="btnNoon" onclick="add('noon')">+ Noon</button>
-<button class="btn-night" id="btnNight" onclick="add('night')">+ Night</button>
-</div>
-<div class="btns-2">
-<button class="btn-undo" onclick="undo()">↩ Undo Last</button>
-<button class="btn-reset" onclick="reset()">🗑 Reset All</button>
-</div>
+<header>
+  <div class="header-row">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M4 10L12 4L20 10V19C20 19.5523 19.5523 20 19 20H5C4.44772 20 4 19.5523 4 19V10Z" stroke="#FFC107" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M9 20V14C9 13.4477 9.44772 13 10 13H14C14.5523 13 15 13.4477 15 14V20" stroke="#FFC107" stroke-width="1.8"/>
+          <circle cx="12" cy="9.5" r="1.4" fill="#FFC107"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h1>Mill Counter</h1>
+        <span class="badge">PRO</span>
+      </div>
+    </div>
+    <button class="icon-btn" onclick="openSettings()" aria-label="Settings">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="month-nav">
+  <button onclick="changeMonth(-1)" aria-label="Previous month">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+  <span class="month-label" id="monthLabel">August 2026</span>
+  <button onclick="changeMonth(1)" aria-label="Next month">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+  </button>
 </div>
 
-<div class="card">
-<h3>This Month</h3>
-<div class="summary">
-<div class="box"><h2 id="fullCount">0</h2><p>Full</p></div>
-<div class="box"><h2 id="noonCount">0</h2><p>Noon</p></div>
-<div class="box"><h2 id="nightCount">0</h2><p>Night</p></div>
-</div>
-<div class="total">Total: <span id="totalAmount">0</span> Tk</div>
+<main>
+  <div class="card">
+    <h3>Add Entry</h3>
+    <input type="date" id="date" class="date-input">
+    <div class="btns">
+      <button class="shift-btn btn-full" id="btnFull" onclick="add('full')">Full Day<small id="rFullLbl">₹100</small></button>
+      <button class="shift-btn btn-noon" id="btnNoon" onclick="add('noon')">Noon<small id="rNoonLbl">₹70</small></button>
+      <button class="shift-btn btn-night" id="btnNight" onclick="add('night')">Night<small id="rNightLbl">₹50</small></button>
+    </div>
+    <div class="btns-2">
+      <button class="ghost-btn" onclick="undo()">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 3-7"/></svg>
+        Undo Last
+      </button>
+      <button class="ghost-btn" onclick="resetAll()">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        Reset All
+      </button>
+    </div>
+  </div>
+
+  <div class="card" id="billCard">
+    <h3>Bill Summary</h3>
+    <div class="summary">
+      <div class="box"><div class="n"><span class="full-dot">●</span> <span id="fullCount">0</span></div><div class="l">Full</div></div>
+      <div class="box"><div class="n"><span class="noon-dot">●</span> <span id="noonCount">0</span></div><div class="l">Noon</div></div>
+      <div class="box"><div class="n"><span class="night-dot">●</span> <span id="nightCount">0</span></div><div class="l">Night</div></div>
+    </div>
+    <div class="total-row">
+      <div>
+        <div class="t-label">Total Bill</div>
+        <div class="t-amount">₹<span id="totalAmount">0</span></div>
+      </div>
+      <button class="pay-btn" onclick="payViaUpi()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 9V7a5 5 0 0 0-10 0v2"/><rect x="5" y="9" width="14" height="12" rx="2"/></svg>
+        Pay via UPI
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>History <button class="link-btn" onclick="openSettings()">edit rates</button></h3>
+    <div id="history"><div class="empty">No entries this month yet</div></div>
+  </div>
+</main>
+
+<div class="fab-bar">
+  <div class="fab-inner">
+    <button class="share-btn" onclick="openShareSheet()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14Z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+      Share Bill
+    </button>
+  </div>
 </div>
 
-<div class="card">
-<h3>History</h3>
-<div id="history"></div>
+<!-- Settings modal -->
+<div class="overlay" id="settingsOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>Settings</h2>
+      <button class="icon-btn" onclick="closeSettings()" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="field"><label>Daily Rates (₹)</label>
+      <div class="rate-grid">
+        <div class="field"><input type="number" id="fullRate" placeholder="Full"></div>
+        <div class="field"><input type="number" id="noonRate" placeholder="Noon"></div>
+        <div class="field"><input type="number" id="nightRate" placeholder="Night"></div>
+      </div>
+    </div>
+    <div class="field"><label>Your UPI ID (for receiving payment)</label>
+      <input type="text" id="upiId" placeholder="yourname@upi">
+    </div>
+    <div class="field"><label>Payee / Business Name</label>
+      <input type="text" id="payeeName" placeholder="Mill Counter">
+    </div>
+    <button class="save-btn" onclick="saveSettings()">Save Settings</button>
+  </div>
 </div>
+
+<!-- Share sheet modal -->
+<div class="overlay" id="shareOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>Share Bill</h2>
+      <button class="icon-btn" onclick="closeShareSheet()" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <button class="share-option" onclick="sharePdf(true)">
+      <div class="share-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
+      <div><div class="so-title">Share as PDF</div><div class="so-sub">Send the bill via WhatsApp, email, etc.</div></div>
+    </button>
+    <button class="share-option" onclick="sharePdf(false)">
+      <div class="share-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg></div>
+      <div><div class="so-title">Download PDF</div><div class="so-sub">Save the bill to this device</div></div>
+    </button>
+    <button class="share-option" onclick="shareAsImage()">
+      <div class="share-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>
+      <div><div class="so-title">Share as Photo</div><div class="so-sub">Send a screenshot-style image instead</div></div>
+    </button>
+  </div>
 </div>
 
 <div id="toast"></div>
 
 <script>
-let data = JSON.parse(localStorage.getItem('millDataV5')) || [];
+/* ---------- State ---------- */
+let data = JSON.parse(localStorage.getItem('millcounter_data') || '[]');
+let settings = Object.assign(
+  { fullRate: 100, noonRate: 70, nightRate: 50, upiId: '', payeeName: 'Mill Counter' },
+  JSON.parse(localStorage.getItem('millcounter_settings') || '{}')
+);
+let viewYear, viewMonth; // 0-indexed month
+
 const dateEl = document.getElementById('date');
 const btnFull = document.getElementById('btnFull');
 const btnNoon = document.getElementById('btnNoon');
 const btnNight = document.getElementById('btnNight');
-dateEl.valueAsDate = new Date();
 
+(function init(){
+  const now = new Date();
+  viewYear = now.getFullYear();
+  viewMonth = now.getMonth();
+  dateEl.valueAsDate = now;
+  populateSettingsForm();
+  updateRateLabels();
+  render();
+})();
+
+/* ---------- Helpers ---------- */
+function pad(n){ return String(n).padStart(2,'0'); }
+function monthKey(y,m){ return `${y}-${pad(m+1)}`; }
+function fmtMoney(n){ return n.toLocaleString('en-IN'); }
+function save(){
+  localStorage.setItem('millcounter_data', JSON.stringify(data));
+  render();
+}
 function showToast(msg){
   const t = document.getElementById('toast');
-  t.innerText = msg; 
+  t.innerText = msg;
   t.style.display = 'block';
-  setTimeout(() => t.style.display = 'none', 2000);
+  clearTimeout(t._hideTimer);
+  t._hideTimer = setTimeout(() => t.style.display = 'none', 2400);
+}
+function typeLabel(t){ return t === 'full' ? 'Full Day' : t === 'noon' ? 'Noon' : 'Night'; }
+function monthEntries(){
+  const key = monthKey(viewYear, viewMonth);
+  return data.filter(x => x.date.startsWith(key));
 }
 
-function save(){
-  localStorage.setItem('millDataV5', JSON.stringify(data));
-  updateUI();
+/* ---------- Rates / settings ---------- */
+function updateRateLabels(){
+  document.getElementById('rFullLbl').innerText = '₹' + settings.fullRate;
+  document.getElementById('rNoonLbl').innerText = '₹' + settings.noonRate;
+  document.getElementById('rNightLbl').innerText = '₹' + settings.nightRate;
+}
+function populateSettingsForm(){
+  document.getElementById('fullRate').value = settings.fullRate;
+  document.getElementById('noonRate').value = settings.noonRate;
+  document.getElementById('nightRate').value = settings.nightRate;
+  document.getElementById('upiId').value = settings.upiId;
+  document.getElementById('payeeName').value = settings.payeeName;
+}
+function openSettings(){ document.getElementById('settingsOverlay').classList.add('show'); }
+function closeSettings(){ document.getElementById('settingsOverlay').classList.remove('show'); }
+function saveSettings(){
+  settings.fullRate = +document.getElementById('fullRate').value || 0;
+  settings.noonRate = +document.getElementById('noonRate').value || 0;
+  settings.nightRate = +document.getElementById('nightRate').value || 0;
+  settings.upiId = document.getElementById('upiId').value.trim();
+  settings.payeeName = document.getElementById('payeeName').value.trim() || 'Mill Counter';
+  localStorage.setItem('millcounter_settings', JSON.stringify(settings));
+  updateRateLabels();
+  closeSettings();
+  showToast('✅ Settings saved');
 }
 
+/* ---------- Month nav ---------- */
+function changeMonth(delta){
+  viewMonth += delta;
+  if(viewMonth > 11){ viewMonth = 0; viewYear++; }
+  if(viewMonth < 0){ viewMonth = 11; viewYear--; }
+  render();
+}
+
+/* ---------- Entries ---------- */
 function add(type){
-  let selectedDate = dateEl.value;
-  let alreadyExists = data.find(x => x.date === selectedDate);
-  
-  if(alreadyExists){
-    showToast("❌ This date already has an entry. Undo first.");
+  const selectedDate = dateEl.value;
+  if(!selectedDate){ showToast('Pick a date first'); return; }
+  if(data.find(x => x.date === selectedDate)){
+    showToast('❌ This date already has an entry. Undo first.');
     return;
   }
-  
-  data.push({date: selectedDate, type: type, ts: Date.now()});
-  showToast("✅ " + type + " added");
+  const rate = type === 'full' ? settings.fullRate : type === 'noon' ? settings.noonRate : settings.nightRate;
+  data.push({ date: selectedDate, type, rate, ts: Date.now() });
+  showToast('✅ ' + typeLabel(type) + ' added');
   save();
 }
-
+function removeEntry(ts){
+  data = data.filter(x => x.ts !== ts);
+  showToast('🗑 Entry removed');
+  save();
+}
 function undo(){
-  if(data.length === 0){
-    showToast("Nothing to undo");
-    return;
-  }
-  data.pop();
-  showToast("↩ Last entry undone");
+  const entries = monthEntries();
+  if(entries.length === 0){ showToast('Nothing to undo this month'); return; }
+  const last = entries.reduce((a,b) => a.ts > b.ts ? a : b);
+  data = data.filter(x => x.ts !== last.ts);
+  showToast('↩ Last entry undone');
   save();
 }
-
-function reset(){
-  if(confirm('Delete ALL data?')){
+function resetAll(){
+  if(confirm('Delete ALL data across every month? This cannot be undone.')){
     data = [];
     save();
-    showToast("🗑 All data deleted");
+    showToast('🗑 All data deleted');
   }
 }
 
-function updateUI(){
-  let f = +document.getElementById('fullRate').value;
-  let n = +document.getElementById('noonRate').value;
-  let ng = +document.getElementById('nightRate').value;
+/* ---------- Render ---------- */
+function render(){
+  document.getElementById('monthLabel').innerText =
+    new Date(viewYear, viewMonth, 1).toLocaleDateString('en-US', { month:'long', year:'numeric' });
 
-  let fc = data.filter(x => x.type === 'full').length;
-  let nc = data.filter(x => x.type === 'noon').length;
-  let ngc = data.filter(x => x.type === 'night').length;
+  const entries = monthEntries().slice().sort((a,b) => a.date.localeCompare(b.date));
+  const fc = entries.filter(x => x.type === 'full').length;
+  const nc = entries.filter(x => x.type === 'noon').length;
+  const ngc = entries.filter(x => x.type === 'night').length;
+  const total = entries.reduce((sum,x) => sum + x.rate, 0);
 
   document.getElementById('fullCount').innerText = fc;
   document.getElementById('noonCount').innerText = nc;
   document.getElementById('nightCount').innerText = ngc;
-  
-  let total = fc * f + nc * n + ngc * ng;
-  document.getElementById('totalAmount').innerText = total;
+  document.getElementById('totalAmount').innerText = fmtMoney(total);
 
-  // 1 Day = 1 Entry Rule: Disable buttons if date already has entry
-  let selectedDate = dateEl.value;
-  let existing = data.find(x => x.date === selectedDate);
+  const existing = data.find(x => x.date === dateEl.value);
   btnFull.disabled = btnNoon.disabled = btnNight.disabled = !!existing;
 
-  document.getElementById('history').innerHTML = data.slice().reverse().map(x => {
-    let label = x.type === 'full' ? 'Full' : x.type === 'noon' ? 'Noon' : 'Night';
-    return `<div class="item"><span>${x.date}</span><span><b>${label}</b></span></div>`
-  }).join('');
+  const historyEl = document.getElementById('history');
+  if(entries.length === 0){
+    historyEl.innerHTML = '<div class="empty">No entries this month yet</div>';
+  } else {
+    historyEl.innerHTML = entries.slice().reverse().map(x => `
+      <div class="item">
+        <div class="item-left">
+          <span class="type-dot dot-${x.type}"></span>
+          <div>
+            <div class="item-date">${x.date}</div>
+            <div class="item-type">${typeLabel(x.type)}</div>
+          </div>
+        </div>
+        <div class="item-right">
+          <span class="item-amt">₹${fmtMoney(x.rate)}</span>
+          <button class="del-btn" onclick="removeEntry(${x.ts})" aria-label="Delete entry">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          </button>
+        </div>
+      </div>
+    `).join('');
+  }
+}
+dateEl.onchange = render;
+
+/* ---------- UPI payment ---------- */
+function payViaUpi(){
+  const total = monthEntries().reduce((sum,x) => sum + x.rate, 0);
+  if(total <= 0){ showToast('No amount to pay yet'); return; }
+  if(!settings.upiId){
+    showToast('⚠️ Add your UPI ID in Settings first');
+    openSettings();
+    return;
+  }
+  const monthLabel = document.getElementById('monthLabel').innerText;
+  const note = encodeURIComponent(`Mill Counter Bill - ${monthLabel}`);
+  const pn = encodeURIComponent(settings.payeeName || 'Mill Counter');
+  const link = `upi://pay?pa=${encodeURIComponent(settings.upiId)}&pn=${pn}&am=${total}&cu=INR&tn=${note}`;
+  window.location.href = link;
 }
 
-document.getElementById('fullRate').oninput = updateUI;
-document.getElementById('noonRate').oninput = updateUI;
-document.getElementById('nightRate').oninput = updateUI;
-dateEl.onchange = updateUI;
+/* ---------- PDF / share ---------- */
+function buildPdf(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+  const entries = monthEntries().slice().sort((a,b) => a.date.localeCompare(b.date));
+  const total = entries.reduce((sum,x) => sum + x.rate, 0);
+  const monthLabel = document.getElementById('monthLabel').innerText;
 
-updateUI();
+  doc.setFont('helvetica','bold'); doc.setFontSize(18); doc.setTextColor(43,33,24);
+  doc.text('Mill Counter', 40, 50);
+  doc.setFontSize(10); doc.setTextColor(120,100,80);
+  doc.text('PRO BILL', 40, 66);
+
+  doc.setFontSize(12); doc.setTextColor(43,33,24); doc.setFont('helvetica','normal');
+  doc.text(monthLabel, 40, 90);
+  if(settings.payeeName){ doc.text('Billed by: ' + settings.payeeName, 40, 106); }
+
+  let y = 140;
+  doc.setDrawColor(230,220,200);
+  doc.line(40, y-14, 555, y-14);
+  doc.setFont('helvetica','bold'); doc.setFontSize(11);
+  doc.text('Date', 40, y);
+  doc.text('Shift', 250, y);
+  doc.text('Amount', 480, y, { align:'right' });
+  y += 8;
+  doc.line(40, y, 555, y);
+  y += 20;
+
+  doc.setFont('helvetica','normal');
+  entries.forEach(e => {
+    if(y > 780){ doc.addPage(); y = 50; }
+    doc.text(e.date, 40, y);
+    doc.text(typeLabel(e.type), 250, y);
+    doc.text('Rs. ' + fmtMoney(e.rate), 480, y, { align:'right' });
+    y += 20;
+  });
+
+  y += 10;
+  doc.setDrawColor(43,33,24);
+  doc.line(40, y, 555, y);
+  y += 24;
+  doc.setFont('helvetica','bold'); doc.setFontSize(14);
+  doc.text('Total', 40, y);
+  doc.text('Rs. ' + fmtMoney(total), 480, y, { align:'right' });
+
+  return doc;
+}
+
+function openShareSheet(){
+  if(monthEntries().length === 0){ showToast('No entries to share this month'); return; }
+  document.getElementById('shareOverlay').classList.add('show');
+}
+function closeShareSheet(){ document.getElementById('shareOverlay').classList.remove('show'); }
+
+async function sharePdf(useShareSheet){
+  const doc = buildPdf();
+  const monthLabel = document.getElementById('monthLabel').innerText.replace(' ','-');
+  const filename = `MillCounter-${monthLabel}.pdf`;
+
+  if(useShareSheet && navigator.canShare){
+    try{
+      const blob = doc.output('blob');
+      const file = new File([blob], filename, { type: 'application/pdf' });
+      if(navigator.canShare({ files: [file] })){
+        await navigator.share({ files: [file], title: 'Mill Counter Bill', text: 'Mill Counter bill' });
+        closeShareSheet();
+        return;
+      }
+    }catch(e){ /* fall through to download */ }
+  }
+  doc.save(filename);
+  closeShareSheet();
+  showToast('📄 PDF downloaded');
+}
+
+async function shareAsImage(){
+  showToast('Capturing bill…');
+  const card = document.getElementById('billCard');
+  try{
+    const canvas = await html2canvas(card, { backgroundColor: '#FFFCF5', scale: 2 });
+    canvas.toBlob(async (blob) => {
+      const monthLabel = document.getElementById('monthLabel').innerText.replace(' ','-');
+      const filename = `MillCounter-${monthLabel}.png`;
+      const file = new File([blob], filename, { type: 'image/png' });
+      if(navigator.canShare && navigator.canShare({ files: [file] })){
+        try{
+          await navigator.share({ files: [file], title: 'Mill Counter Bill' });
+          closeShareSheet();
+          return;
+        }catch(e){ /* user cancelled or unsupported, fall through */ }
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+      closeShareSheet();
+      showToast('🖼 Image downloaded');
+    }, 'image/png');
+  }catch(e){
+    showToast('Could not capture image');
+  }
+}
 </script>
 </body>
 </html>
