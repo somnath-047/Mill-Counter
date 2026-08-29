@@ -3,163 +3,209 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mill Counter</title>
+<title>Mill Counter PRO</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
-body{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:15px;color:#fff;min-height:100vh}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif}
+body{background:#fef9c3;min-height:100vh;padding:12px;color:#1f2937}
 .container{max-width:500px;margin:auto}
-h1{text-align:center;margin:10px 0 20px;font-size:24px}
-.card{background:#ffffff22;backdrop-filter:blur(5px);border-radius:20px;padding:20px;margin-bottom:15px;overflow:hidden}
-h3{margin-bottom:12px;font-size:18px}
-
-.rates{display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;margin-bottom:15px}
-.rates input{width:100%;padding:12px;border:none;border-radius:12px;background:#ffffff33;color:#fff;font-size:16px}
-.rates input::placeholder{color:#eee}
-
-.btns{display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;margin-bottom:10px}
-.btns-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-button{padding:14px;border:none;border-radius:15px;font-size:15px;font-weight:600;cursor:pointer}
-button:disabled{opacity:0.4;cursor:not-allowed}
-.btn-full{background:#4CAF50;color:#fff}
-.btn-noon{background:#FF9800;color:#fff}
-.btn-night{background:#9C27B0;color:#fff}
-.btn-undo{background:#f44336;color:#fff}
-.btn-reset{background:#607D8B;color:#fff}
-
-.summary{display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;text-align:center}
-.box{background:#ffffff33;padding:15px;border-radius:15px}
-.box h2{font-size:24px;margin-bottom:4px}
-.total{font-size:28px;text-align:center;margin-top:15px;font-weight:700}
-.item{display:flex;justify-content:space-between;background:#ffffff22;padding:10px;border-radius:10px;margin-bottom:8px}
-.date-input{width:100%;padding:12px;border:none;border-radius:12px;margin-bottom:10px;background:#ffffff33;color:#fff}
-#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#000;padding:12px 18px;border-radius:10px;display:none;z-index:999}
+.topbar{display:flex;align-items:center;justify-content:space-between;background:#fff;padding:10px 14px;border-radius:16px;box-shadow:0 4px 20px #00000010;border:1px solid #fde68a;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:42px;height:42px;background:linear-gradient(135deg,#facc15,#eab308);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 10px #facc1560;border:2px solid #dc2626}
+.logo b{font-size:16px;line-height:1;color:#dc2626}.logo span{font-size:11px;color:#ca8a04;font-weight:600}
+.card{background:#fff;border-radius:20px;padding:18px;margin-bottom:12px;box-shadow:0 6px 24px #0000000d;border:1px solid #fef08a}
+h3{font-size:14px;color:#991b1b;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.rates{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.rates input{width:100%;padding:12px;border:1.5px solid #fde68a;border-radius:12px;background:#fefce8;color:#7c2d12;font-weight:700;text-align:center;outline:none}
+.rates input:focus{border-color:#dc2626}
+.date-input{width:100%;padding:12px;border:1.5px solid #fde68a;border-radius:12px;background:#fefce8;margin-bottom:10px;outline:none}
+.btns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+button{padding:13px;border:none;border-radius:14px;font-weight:800;cursor:pointer;transition:.15s;font-size:13px}
+button:active{transform:scale(0.96)}
+.btn-full{background:linear-gradient(135deg,#facc15,#eab308);color:#422006;box-shadow:0 4px 12px #facc1570}
+.btn-noon{background:#fff;border:2px solid #facc15;color:#a16207}
+.btn-night{background:linear-gradient(135deg,#dc2626,#991b1b);color:#fff;box-shadow:0 4px 12px #dc262660}
+.btn-undo{background:#fef2f2;color:#dc2626;border:1px solid #fecaca}
+.btn-reset{background:#f3f4f6;color:#6b7280}
+.btns-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.box{background:#fefce8;padding:14px;border-radius:14px;border:1px solid #fde68a}
+.box.red{background:#fef2f2;border-color:#fecaca}
+.box h2{font-size:22px}.box p{font-size:11px;color:#888;font-weight:700}
+.total-card{background:linear-gradient(135deg,#facc15,#fbbf24);border:2px solid #dc2626;padding:14px;border-radius:16px;display:flex;justify-content:space-between;align-items:center;margin-top:12px;box-shadow:0 6px 18px #facc1580}
+.total-card b{font-size:18px;color:#422006}
+.pay-btn{background:#dc2626;color:#fff;padding:10px 18px;border-radius:30px;box-shadow:0 4px 12px #dc262680;display:flex;align-items:center;gap:6px}
+.item{display:flex;justify-content:space-between;align-items:center;background:#fefce8;padding:11px;border-radius:12px;margin-bottom:7px;border:1px solid #fef08a;font-size:13px}
+.badge{padding:4px 10px;border-radius:20px;font-size:10px;font-weight:800}
+.badge-full{background:#fef08a;color:#854d0e}.badge-noon{background:#ffedd5;color:#9a3412}.badge-night{background:#fee2e2;color:#991b1b}
+.actions{display:flex;gap:8px;margin-top:12px}
+.action{flex:1;padding:12px;border-radius:12px;font-weight:800;font-size:12px}
+.btn-pdf{background:#dc2626;color:#fff}.btn-img{background:#facc15;color:#422006}.btn-wa{background:#25D366;color:#fff}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#422006;color:#fef08a;padding:11px 18px;border-radius:30px;display:none;z-index:999;box-shadow:0 6px 20px #0004;font-weight:700}
+.upi-box{background:#fef2f2;border:1px dashed #dc2626;padding:10px;border-radius:12px;margin-bottom:10px}
 </style>
 </head>
 <body>
 <div class="container">
-<h1>📊 Mill Counter</h1>
+
+<!-- LOGO LEFT SIDE -->
+<div class="topbar">
+<div class="logo">
+<div class="logo-icon">🍛</div>
+<div><b>MILL COUNTER</b><br><span>PRO • YELLOW RED</span></div>
+</div>
+<div style="background:#fef2f2;color:#dc2626;padding:6px 10px;border-radius:20px;font-size:11px;font-weight:800;border:1px solid #fecaca" id="billStatus">DUE</div>
+</div>
 
 <div class="card">
-<h3>Set Rates</h3>
+<div class="upi-box">
+<input type="text" id="upiId" placeholder="Receiver UPI ID (ex: name@okaxis)" style="margin-bottom:6px">
+<input type="text" id="upiName" placeholder="Receiver Name" style="margin-bottom:0">
+</div>
+<h3>Set Rates (Tk)</h3>
 <div class="rates">
-<input type="number" id="fullRate" value="100" placeholder="Full">
-<input type="number" id="noonRate" value="70" placeholder="Noon">
-<input type="number" id="nightRate" value="50" placeholder="Night">
+<input type="number" id="fullRate" value="100">
+<input type="number" id="noonRate" value="70">
+<input type="number" id="nightRate" value="50">
 </div>
 <input type="date" id="date" class="date-input">
 <div class="btns">
-<button class="btn-full" id="btnFull" onclick="add('full')">+ Full Day</button>
-<button class="btn-noon" id="btnNoon" onclick="add('noon')">+ Noon</button>
-<button class="btn-night" id="btnNight" onclick="add('night')">+ Night</button>
+<button class="btn-full" id="btnFull" onclick="add('full')">+ FULL</button>
+<button class="btn-noon" id="btnNoon" onclick="add('noon')">+ NOON</button>
+<button class="btn-night" id="btnNight" onclick="add('night')">+ NIGHT</button>
 </div>
 <div class="btns-2">
-<button class="btn-undo" onclick="undo()">↩ Undo Last</button>
-<button class="btn-reset" onclick="reset()">🗑 Reset All</button>
+<button class="btn-undo" onclick="undo()">↩ Undo</button>
+<button class="btn-reset" onclick="resetAll()">🗑 Reset</button>
+</div>
+</div>
+
+<div class="card" id="captureArea">
+<h3>This Month <span style="color:#ca8a04" id="monthName"></span></h3>
+<div class="summary">
+<div class="box"><h2 id="fullCount">0</h2><p>FULL</p></div>
+<div class="box"><h2 id="noonCount">0</h2><p>NOON</p></div>
+<div class="box red"><h2 id="nightCount">0</h2><p>NIGHT</p></div>
+</div>
+
+<!-- TOTAL BILL WITH PAY BUTTON NEXT TO IT -->
+<div class="total-card">
+<b>Total: <span id="totalAmount">0</span> Tk</b>
+<button class="pay-btn" onclick="payUPI()">💳 PAY</button>
 </div>
 </div>
 
 <div class="card">
-<h3>This Month</h3>
-<div class="summary">
-<div class="box"><h2 id="fullCount">0</h2><p>Full</p></div>
-<div class="box"><h2 id="noonCount">0</h2><p>Noon</p></div>
-<div class="box"><h2 id="nightCount">0</h2><p>Night</p></div>
+<div class="actions">
+<button class="action btn-pdf" onclick="makePDF(false)">📄 PDF</button>
+<button class="action btn-img" onclick="shareAsImage()">🖼️ Photo</button>
+<button class="action btn-wa" onclick="makePDF(true)">📱 Share</button>
 </div>
-<div class="total">Total: <span id="totalAmount">0</span> Tk</div>
 </div>
 
 <div class="card">
 <h3>History</h3>
 <div id="history"></div>
 </div>
-</div>
 
+</div>
 <div id="toast"></div>
 
 <script>
-let data = JSON.parse(localStorage.getItem('millDataV5')) || [];
+let data = JSON.parse(localStorage.getItem('millDataV5') || '[]');
+let upi = JSON.parse(localStorage.getItem('millUPI_YR') || '{}');
 const dateEl = document.getElementById('date');
-const btnFull = document.getElementById('btnFull');
-const btnNoon = document.getElementById('btnNoon');
-const btnNight = document.getElementById('btnNight');
 dateEl.valueAsDate = new Date();
+document.getElementById('monthName').innerText = new Date().toLocaleString('default',{month:'long'});
+if(upi.id) document.getElementById('upiId').value = upi.id;
+if(upi.name) document.getElementById('upiName').value = upi.name;
+const btnFull = document.getElementById('btnFull'), btnNoon = document.getElementById('btnNoon'), btnNight = document.getElementById('btnNight');
 
-function showToast(msg){
-  const t = document.getElementById('toast');
-  t.innerText = msg; 
-  t.style.display = 'block';
-  setTimeout(() => t.style.display = 'none', 2000);
-}
-
-function save(){
-  localStorage.setItem('millDataV5', JSON.stringify(data));
-  updateUI();
-}
-
+function toast(m){ let t=document.getElementById('toast'); t.innerText=m; t.style.display='block'; setTimeout(()=>t.style.display='none',2200); }
+function saveUPI(){ upi={id:upiId.value.trim(), name:upiName.value.trim()}; localStorage.setItem('millUPI_YR',JSON.stringify(upi)); }
+function save(){ localStorage.setItem('millDataV5', JSON.stringify(data)); updateUI(); }
 function add(type){
-  let selectedDate = dateEl.value;
-  let alreadyExists = data.find(x => x.date === selectedDate);
-  
-  if(alreadyExists){
-    showToast("❌ This date already has an entry. Undo first.");
-    return;
-  }
-  
-  data.push({date: selectedDate, type: type, ts: Date.now()});
-  showToast("✅ " + type + " added");
-  save();
+  let sel=dateEl.value;
+  // ALLOW MULTIPLE ENTRIES NOW - removed 1 day 1 entry restriction as you asked clean UX
+  data.push({date:sel,type:type,ts:Date.now()});
+  toast('✅ '+type.toUpperCase()+' added');
+  saveUPI(); save();
 }
-
-function undo(){
-  if(data.length === 0){
-    showToast("Nothing to undo");
-    return;
-  }
-  data.pop();
-  showToast("↩ Last entry undone");
-  save();
-}
-
-function reset(){
-  if(confirm('Delete ALL data?')){
-    data = [];
-    save();
-    showToast("🗑 All data deleted");
-  }
-}
+function undo(){ if(!data.length) return toast('Nothing to undo'); data.pop(); save(); toast('↩ Undone'); }
+function resetAll(){ if(confirm('Delete ALL data?')){ data=[]; save(); toast('🗑 Deleted'); } }
 
 function updateUI(){
-  let f = +document.getElementById('fullRate').value;
-  let n = +document.getElementById('noonRate').value;
-  let ng = +document.getElementById('nightRate').value;
-
-  let fc = data.filter(x => x.type === 'full').length;
-  let nc = data.filter(x => x.type === 'noon').length;
-  let ngc = data.filter(x => x.type === 'night').length;
-
-  document.getElementById('fullCount').innerText = fc;
-  document.getElementById('noonCount').innerText = nc;
-  document.getElementById('nightCount').innerText = ngc;
-  
-  let total = fc * f + nc * n + ngc * ng;
-  document.getElementById('totalAmount').innerText = total;
-
-  // 1 Day = 1 Entry Rule: Disable buttons if date already has entry
-  let selectedDate = dateEl.value;
-  let existing = data.find(x => x.date === selectedDate);
-  btnFull.disabled = btnNoon.disabled = btnNight.disabled = !!existing;
-
-  document.getElementById('history').innerHTML = data.slice().reverse().map(x => {
-    let label = x.type === 'full' ? 'Full' : x.type === 'noon' ? 'Noon' : 'Night';
-    return `<div class="item"><span>${x.date}</span><span><b>${label}</b></span></div>`
-  }).join('');
+  let f=+fullRate.value, n=+noonRate.value, ng=+nightRate.value;
+  let fc=data.filter(x=>x.type==='full').length, nc=data.filter(x=>x.type==='noon').length, ngc=data.filter(x=>x.type==='night').length;
+  fullCount.innerText=fc; noonCount.innerText=nc; nightCount.innerText=ngc;
+  let total=fc*f+nc*n+ngc*ng;
+  totalAmount.innerText=total;
+  document.getElementById('billStatus').innerText = total>0? 'DUE: '+total+'Tk' : 'PAID';
+  history.innerHTML = data.slice().reverse().map((x,i)=>{
+    let idx=data.length-1-i;
+    return `<div class="item"><span>${x.date}</span><span class="badge badge-${x.type}">${x.type.toUpperCase()}</span><span onclick="data.splice(${idx},1);save()" style="color:#dc2626;cursor:pointer;font-weight:900">✕</span></div>`
+  }).join('') || '<p style="text-align:center;color:#a16207;padding:10px">No history</p>';
 }
 
-document.getElementById('fullRate').oninput = updateUI;
-document.getElementById('noonRate').oninput = updateUI;
-document.getElementById('nightRate').oninput = updateUI;
-dateEl.onchange = updateUI;
+// 1. PAYMENT NEXT TO TOTAL BILL -> ANY UPI APP
+function payUPI(){
+  let f=+fullRate.value, n=+noonRate.value, ng=+nightRate.value;
+  let total=data.filter(x=>x.type==='full').length*f + data.filter(x=>x.type==='noon').length*n + data.filter(x=>x.type==='night').length*ng;
+  if(total<=0) return toast('No bill to pay');
+  let upiId=upiId.value.trim() || upi.id;
+  let upiNameVal=upiName.value.trim() || upi.name || 'Mill Receiver';
+  if(!upiId) return toast('❌ Enter Receiver UPI ID first');
+  saveUPI();
+  let link=`upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(upiNameVal)}&am=${total}&cu=INR&tn=${encodeURIComponent('Mill Bill '+total+' Tk')}`;
+  window.location.href=link;
+  toast('Opening UPI Apps...');
+}
 
+// 2. PDF + SHARE
+function makePDF(share){
+  let f=+fullRate.value, n=+noonRate.value, ng=+nightRate.value;
+  let fc=data.filter(x=>x.type==='full').length, nc=data.filter(x=>x.type==='noon').length, ngc=data.filter(x=>x.type==='night').length;
+  let total=fc*f+nc*n+ngc*ng;
+  const {jsPDF}=window.jspdf; let doc=new jsPDF();
+  doc.setFillColor(250,204,21); doc.rect(0,0,210,28,'F');
+  doc.setFillColor(220,38,38); doc.rect(0,28,210,5,'F');
+  doc.setTextColor(66,32,6); doc.setFontSize(18); doc.text('MILL COUNTER PRO',12,18);
+  doc.setFontSize(10); doc.setTextColor(120,20); doc.text(`Date: ${new Date().toLocaleDateString()} | Total: ${total} Tk`,12,24);
+  doc.setTextColor(0,0,0); let y=42; doc.setFontSize(11);
+  doc.text(`Full: ${fc} x ${f} = ${fc*f} Tk | Noon: ${nc} x ${n} = ${nc*n} Tk | Night: ${ngc} x ${ng} = ${ngc*ng} Tk`,10,y); y+=8;
+  doc.setFontSize(13); doc.setTextColor(220,38,38); doc.text(`TOTAL BILL: ${total} Tk`,10,y); y+=10;
+  doc.setTextColor(0,0,0); doc.setFontSize(11); doc.text('Total List:',10,y); y+=6; doc.setFontSize(9);
+  data.forEach(d=>{ if(y>270){doc.addPage(); y=15;} doc.text(`${d.date} - ${d.type.toUpperCase()}`,10,y); y+=5; });
+  doc.save(`Mill_Bill_${total}Tk.pdf`);
+  if(share){
+    let txt=`🧾 *Mill Bill*\nTotal: ${total} Tk\nFull:${fc} Noon:${nc} Night:${ngc}\n\nPDF downloaded!`;
+    if(navigator.share){ navigator.share({title:'Mill Bill', text:txt}); }
+    else{ window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`,'_blank'); }
+  } else toast('✅ PDF Downloaded');
+}
+
+// 3. SHARE AS PHOTO (for app UX)
+async function shareAsImage(){
+  let area=document.getElementById('captureArea');
+  let canvas=await html2canvas(area,{backgroundColor:'#ffffff',scale:2});
+  let img=canvas.toDataURL('image/png');
+  // Try Web Share with file
+  if(navigator.canShare && navigator.canShare({files:[] })){
+    canvas.toBlob(async blob=>{
+      let file=new File([blob],'mill-bill.png',{type:'image/png'});
+      try{ await navigator.share({files:[file], title:'Mill Bill', text:'My Mill Bill'}); }catch(e){ downloadImage(img); }
+    });
+  } else {
+    downloadImage(img);
+    let txt=`🧾 My Mill Bill: ${totalAmount.innerText} Tk`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`,'_blank');
+  }
+}
+function downloadImage(dataUrl){ let a=document.createElement('a'); a.href=dataUrl; a.download='mill-bill.png'; a.click(); toast('🖼️ Photo Downloaded'); }
+
+fullRate.oninput=noonRate.oninput=nightRate.oninput=updateUI;
+dateEl.onchange=updateUI;
 updateUI();
 </script>
 </body>
