@@ -1,7 +1,7 @@
 {
-  "name": "Mill Counter Pro",
-  "short_name": "Mill Counter",
-  "description": "Mill Counter Pro - hisab o counting app",
+  "name": "Meal Counter Pro",
+  "short_name": "Meal Counter",
+  "description": "Meal Counter Pro - hisab o counting app",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

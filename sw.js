@@ -1,4 +1,4 @@
-const CACHE_NAME = "mill-counter-v1";
+const CACHE_NAME = "meal-counter-v2";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
