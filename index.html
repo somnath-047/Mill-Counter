@@ -1016,11 +1016,36 @@ async function shareAsImage(){
 </script>
 <script>
 if ('serviceWorker' in navigator) {
+
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js').catch(function (err) {
-      console.log('Service worker register failed:', err);
-    });
+
+    navigator.serviceWorker.register('sw.js?v=4')
+      .then(function (registration) {
+
+        console.log(
+          'Meal Counter Service Worker registered:',
+          registration.scope
+        );
+
+        /*
+         * Check for a new Service Worker every time
+         * the website is opened.
+         */
+
+        registration.update();
+
+      })
+      .catch(function (error) {
+
+        console.error(
+          'Meal Counter Service Worker registration failed:',
+          error
+        );
+
+      });
+
   });
+
 }
 </script>
 </body>
