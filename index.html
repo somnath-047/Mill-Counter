@@ -20,6 +20,10 @@
     --red-600:#D6293E;
     --red-700:#B71C2E;
     --red-900:#7A1220;
+    --violet-600:#7C5CBF;
+    --violet-800:#4E3583;
+    --blue-600:#1E88E5;
+    --blue-800:#125EA8;
     --cream-50:#FFFCF5;
     --cream-100:#FFF6E5;
     --ink-900:#2B2118;
@@ -68,10 +72,10 @@
   .brand-text .badge{
     display:inline-block;margin-top:3px;background:var(--red-700);color:#fff;
     font-family:'Poppins',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.06em;
-    padding:2px 7px;border-radius:6px;
+    padding:2px 7px;border-radius:var(--radius-sm);
   }
   .icon-btn{
-    width:40px;height:40px;border-radius:12px;border:none;
+    width:40px;height:40px;border-radius:var(--radius-md);border:none;
     background:rgba(43,33,24,0.12);display:flex;align-items:center;justify-content:center;cursor:pointer;
   }
   .icon-btn svg{stroke:var(--ink-900)}
@@ -80,11 +84,11 @@
   .month-nav{
     max-width:448px;margin:-20px auto 0;background:var(--white);
     border-radius:var(--radius-md);box-shadow:var(--shadow);
-    display:flex;align-items:center;justify-content:space-between;
+    display:flex;align-items:center;justify-content:center;gap:18px;
     padding:10px 8px;position:relative;z-index:2;
   }
   .month-nav button{
-    width:36px;height:36px;border:none;background:var(--cream-100);border-radius:10px;
+    width:36px;height:36px;border:none;background:var(--cream-100);border-radius:var(--radius-sm);
     display:flex;align-items:center;justify-content:center;cursor:pointer;
   }
   .month-nav button svg{stroke:var(--red-700)}
@@ -96,9 +100,10 @@
     background:var(--white);border-radius:var(--radius-lg);padding:18px;
     margin-bottom:14px;box-shadow:var(--shadow);border:1px solid var(--line);
   }
-  .card h3{font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;color:var(--ink-600);
+  .card h2{font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;color:var(--ink-600);
     text-transform:uppercase;letter-spacing:0.04em;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
-  .card h3 .link-btn{font-size:11px;text-transform:none;letter-spacing:0;color:var(--red-700);font-weight:700;cursor:pointer;background:none;border:none}
+  .card h2 .rates-link{font-size:12px;text-transform:none;letter-spacing:0;color:var(--ink-600);font-weight:600;cursor:pointer;background:var(--cream-100);border:none;border-radius:var(--radius-sm);padding:6px 10px;display:inline-flex;align-items:center;gap:5px}
+  .card h2 .rates-link svg{width:13px;height:13px;stroke:var(--ink-600)}
 
   /* Date + entry */
   .date-input{
@@ -115,7 +120,7 @@
   .shift-btn:disabled{opacity:0.35;cursor:not-allowed}
   .btn-full{background:linear-gradient(135deg,var(--yellow-500),var(--yellow-600))}
   .btn-noon{background:linear-gradient(135deg,var(--amber-600),#E65100)}
-  .btn-night{background:linear-gradient(135deg,var(--red-600),var(--red-900))}
+  .btn-night{background:linear-gradient(135deg,var(--violet-600),var(--violet-800))}
   .btns-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .ghost-btn{
     padding:11px;border-radius:var(--radius-sm);border:1.5px solid var(--line);background:var(--white);
@@ -123,13 +128,15 @@
     display:flex;align-items:center;justify-content:center;gap:6px;
   }
   .ghost-btn svg{width:14px;height:14px;stroke:var(--ink-600)}
+  .ghost-btn.danger{color:var(--red-700);border-color:rgba(214,41,62,0.35)}
+  .ghost-btn.danger svg{stroke:var(--red-700)}
 
   /* Summary */
   .summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
   .box{background:var(--cream-100);padding:12px 6px;border-radius:var(--radius-sm);text-align:center}
   .box .n{font-family:'Poppins',sans-serif;font-size:22px;font-weight:700}
-  .box .l{font-size:11px;color:var(--ink-600);margin-top:2px}
-  .full-dot{color:var(--yellow-600)} .noon-dot{color:var(--amber-600)} .night-dot{color:var(--red-700)}
+  .box .l{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;color:var(--ink-900);margin-top:4px;text-transform:uppercase;letter-spacing:0.03em}
+  .full-dot{color:var(--yellow-600)} .noon-dot{color:var(--amber-600)} .night-dot{color:var(--violet-600)}
 
   .total-row{
     display:flex;align-items:center;justify-content:space-between;
@@ -138,25 +145,25 @@
   .total-row .t-label{color:#D8CBB8;font-size:11px;text-transform:uppercase;letter-spacing:0.05em}
   .total-row .t-amount{font-family:'Poppins',sans-serif;font-size:24px;font-weight:700;color:#fff}
   .pay-btn{
-    background:linear-gradient(135deg,var(--red-600),var(--red-900));color:#fff;border:none;
-    padding:12px 16px;border-radius:12px;font-family:'Poppins',sans-serif;font-weight:700;font-size:13.5px;
+    background:linear-gradient(135deg,var(--blue-600),var(--blue-800));color:#fff;border:none;
+    padding:12px 16px;border-radius:var(--radius-md);font-family:'Poppins',sans-serif;font-weight:700;font-size:13.5px;
     display:flex;align-items:center;gap:7px;cursor:pointer;white-space:nowrap;
-    box-shadow:0 4px 12px rgba(214,41,62,0.4);
+    box-shadow:0 4px 12px rgba(30,136,229,0.35);
   }
   .pay-btn.is-paid{background:linear-gradient(135deg,#2E7D32,#1B5E20);box-shadow:0 4px 12px rgba(46,125,50,0.4)}
   .paid-badge{
     display:inline-flex;align-items:center;gap:4px;margin-top:4px;background:rgba(76,175,80,0.18);
     color:#8BE28F;font-family:'Poppins',sans-serif;font-size:10.5px;font-weight:700;
-    padding:2px 8px;border-radius:8px;letter-spacing:0.03em;
+    padding:2px 8px;border-radius:var(--radius-sm);letter-spacing:0.03em;
   }
   .month-paid-dot{
     display:inline-block;width:7px;height:7px;border-radius:50%;background:#2E7D32;margin-left:6px;
     vertical-align:middle;
   }
-  .item.is-paid{background:rgba(46,125,50,0.06);border-radius:10px;padding-left:8px;padding-right:8px}
+  .item.is-paid{background:rgba(46,125,50,0.06);border-radius:var(--radius-sm);padding-left:8px;padding-right:8px}
   .item-tag-paid{
     font-size:9.5px;font-weight:700;color:#2E7D32;background:rgba(46,125,50,0.12);
-    padding:1px 6px;border-radius:6px;margin-top:2px;display:inline-block;
+    padding:1px 6px;border-radius:var(--radius-sm);margin-top:2px;display:inline-block;
   }
   .due-item{
     display:flex;align-items:center;justify-content:space-between;padding:10px 4px;
@@ -169,7 +176,7 @@
   }
   .paid-stamp{
     border:1.5px solid #2E7D32;color:#2E7D32;font-family:'Poppins',sans-serif;font-weight:700;
-    font-size:12px;padding:8px 10px;border-radius:10px;margin:8px 0 4px;display:inline-block;
+    font-size:12px;padding:8px 10px;border-radius:var(--radius-sm);margin:8px 0 4px;display:inline-block;
     background:rgba(46,125,50,0.08);
   }
 
@@ -182,7 +189,7 @@
   .item:last-child{border-bottom:none}
   .item-left{display:flex;align-items:center;gap:10px}
   .type-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-  .dot-full{background:var(--yellow-500)} .dot-noon{background:var(--amber-600)} .dot-night{background:var(--red-700)}
+  .dot-full{background:var(--yellow-500)} .dot-noon{background:var(--amber-600)} .dot-night{background:var(--violet-600)}
   .item-date{font-size:13.5px;font-weight:500}
   .item-type{font-size:11px;color:var(--ink-600)}
   .item-right{display:flex;align-items:center;gap:10px}
@@ -198,8 +205,8 @@
   }
   .fab-inner{max-width:480px;margin:0 auto}
   .share-btn{
-    width:100%;padding:14px;border:none;border-radius:14px;cursor:pointer;
-    background:linear-gradient(135deg,var(--yellow-500),var(--red-600));color:#fff;
+    width:100%;padding:14px;border:none;border-radius:var(--radius-md);cursor:pointer;
+    background:linear-gradient(135deg,var(--yellow-500),var(--amber-600));color:#fff;
     font-family:'Poppins',sans-serif;font-weight:700;font-size:15px;
     display:flex;align-items:center;justify-content:center;gap:8px;
   }
@@ -211,7 +218,7 @@
   }
   .overlay.show{display:flex}
   .modal{
-    background:var(--white);width:100%;max-width:480px;border-radius:22px 22px 0 0;
+    background:var(--white);width:100%;max-width:480px;border-radius:var(--radius-lg) var(--radius-lg) 0 0;
     padding:20px 20px calc(20px + env(safe-area-inset-bottom));max-height:85vh;overflow-y:auto;
     animation:slideUp .25s ease;
   }
@@ -227,7 +234,7 @@
   .rate-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
   .rate-grid .field{margin-bottom:0}
   .save-btn{
-    width:100%;padding:14px;border:none;border-radius:14px;margin-top:6px;cursor:pointer;
+    width:100%;padding:14px;border:none;border-radius:var(--radius-md);margin-top:6px;cursor:pointer;
     background:var(--ink-900);color:#fff;font-family:'Poppins',sans-serif;font-weight:700;font-size:14.5px;
   }
   .share-option{
@@ -235,14 +242,14 @@
     width:100%;text-align:left;cursor:pointer;border-bottom:1px solid var(--line);
   }
   .share-option:last-child{border-bottom:none}
-  .share-icon{width:40px;height:40px;border-radius:12px;background:var(--cream-100);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .share-icon{width:40px;height:40px;border-radius:var(--radius-md);background:var(--cream-100);display:flex;align-items:center;justify-content:center;flex-shrink:0}
   .share-icon svg{stroke:var(--red-700)}
   .share-option .so-title{font-family:'Poppins',sans-serif;font-weight:600;font-size:14px}
   .share-option .so-sub{font-size:11.5px;color:var(--ink-600);margin-top:1px}
 
   #toast{
     position:fixed;bottom:100px;left:50%;transform:translateX(-50%);
-    background:var(--ink-900);color:#fff;padding:11px 18px;border-radius:12px;
+    background:var(--ink-900);color:#fff;padding:11px 18px;border-radius:var(--radius-md);
     font-size:13px;font-weight:500;display:none;z-index:200;box-shadow:0 6px 18px rgba(0,0,0,0.25);
     max-width:85%;text-align:center;
   }
@@ -279,7 +286,10 @@
 
 <main>
   <div class="card">
-    <h3>Add Entry</h3>
+    <h2>Add Entry <button class="rates-link" onclick="openSettings()" aria-label="Edit meal rates">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        Edit rates
+      </button></h2>
     <input type="date" id="date" class="date-input">
     <div class="btns">
       <button class="shift-btn btn-full" id="btnFull" onclick="add('full')">Full Day<small id="rFullLbl">₹100</small></button>
@@ -291,7 +301,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 3-7"/></svg>
         Undo Last
       </button>
-      <button class="ghost-btn" onclick="resetAll()">
+      <button class="ghost-btn danger" onclick="resetAll()">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
         Reset All
       </button>
@@ -299,7 +309,7 @@
   </div>
 
   <div class="card" id="billCard">
-    <h3>Bill Summary</h3>
+    <h2>Bill Summary</h2>
     <div class="summary">
       <div class="box"><div class="n"><span class="full-dot">●</span> <span id="fullCount">0</span></div><div class="l">Full</div></div>
       <div class="box"><div class="n"><span class="noon-dot">●</span> <span id="noonCount">0</span></div><div class="l">Noon</div></div>
@@ -319,7 +329,7 @@
   </div>
 
   <div class="card">
-    <h3>History <button class="link-btn" onclick="openSettings()">edit rates</button></h3>
+    <h2>History</h2>
     <div id="history"><div class="empty">No entries this month yet</div></div>
   </div>
 </main>
@@ -475,6 +485,7 @@ const btnNight = document.getElementById('btnNight');
   viewYear = now.getFullYear();
   viewMonth = now.getMonth();
   dateEl.valueAsDate = now;
+  syncDateToViewedMonth();
   populateSettingsForm();
   updateRateLabels();
   render();
@@ -555,10 +566,37 @@ function saveSettings(){
 }
 
 /* ---------- Month nav ---------- */
+function daysInMonth(y,m){ return new Date(y, m+1, 0).getDate(); }
+// Keep the "Add Entry" date field locked to whichever month is currently
+// being viewed. Without this, the date field could silently keep showing
+// a date from a different month (e.g. still "today") while the person is
+// browsing a past/future month, so a new entry would land in the wrong
+// month's data instead of the month they're actually looking at.
+function syncDateToViewedMonth(){
+  const min = `${viewYear}-${pad(viewMonth+1)}-01`;
+  const max = `${viewYear}-${pad(viewMonth+1)}-${pad(daysInMonth(viewYear, viewMonth))}`;
+  dateEl.min = min;
+  dateEl.max = max;
+  const cur = dateEl.value ? new Date(dateEl.value + 'T00:00:00') : null;
+  const inView = cur && cur.getFullYear() === viewYear && cur.getMonth() === viewMonth;
+  if(!inView){
+    const now = new Date();
+    const isRealCurrentMonth = (viewYear === now.getFullYear() && viewMonth === now.getMonth());
+    if(isRealCurrentMonth){
+      dateEl.valueAsDate = now;
+    } else {
+      // Keep the same day-of-month when possible (helps entering a
+      // sequence of dates in a past month), clamped to that month's length.
+      const keepDay = cur ? Math.min(cur.getDate(), daysInMonth(viewYear, viewMonth)) : 1;
+      dateEl.value = `${viewYear}-${pad(viewMonth+1)}-${pad(keepDay)}`;
+    }
+  }
+}
 function changeMonth(delta){
   viewMonth += delta;
   if(viewMonth > 11){ viewMonth = 0; viewYear++; }
   if(viewMonth < 0){ viewMonth = 11; viewYear--; }
+  syncDateToViewedMonth();
   render();
 }
 
@@ -566,6 +604,12 @@ function changeMonth(delta){
 function add(type){
   const selectedDate = dateEl.value;
   if(!selectedDate){ showToast('Pick a date first'); return; }
+  if(!selectedDate.startsWith(monthKey(viewYear, viewMonth))){
+    // Guards against ever writing an entry into a month other than the
+    // one currently being viewed (see syncDateToViewedMonth).
+    showToast('That date is outside the month you\'re viewing');
+    return;
+  }
   if(data.find(x => x.date === selectedDate)){
     showToast('❌ This date already has an entry. Undo first.');
     return;
@@ -591,6 +635,12 @@ function undo(){
 function resetAll(){
   if(confirm('Delete ALL data across every month? This cannot be undone.')){
     data = [];
+    // Also clear recorded payments — otherwise a month could still show
+    // as "Paid" (and the Pay button as "Paid — Pay again / dues") even
+    // though every entry it was paid for has just been deleted.
+    payments = {};
+    savePayments();
+    pendingPayment = null;
     save();
     showToast('🗑 All data deleted');
   }
@@ -847,10 +897,17 @@ function buildPdf(){
   const currentKey = monthKey(viewYear, viewMonth);
   const paymentInfo = payments[currentKey];
 
+  // Small logo to the left of the title, reused from the app header so the
+  // bill is recognizable at a glance without shipping a second image asset.
+  const logoEl = document.querySelector('.logo img');
+  const textX = logoEl ? 74 : 40;
+  if(logoEl && logoEl.src){
+    try{ doc.addImage(logoEl.src, 'PNG', 40, 26, 28, 28); }catch(e){ /* ignore if it can't be embedded */ }
+  }
   doc.setFont('helvetica','bold'); doc.setFontSize(18); doc.setTextColor(43,33,24);
-  doc.text('Meal Counter', 40, 50);
+  doc.text('Meal Counter', textX, 46);
   doc.setFontSize(10); doc.setTextColor(120,100,80);
-  doc.text('PRO BILL', 40, 66);
+  doc.text('PRO BILL', textX, 62);
 
   doc.setFontSize(12); doc.setTextColor(43,33,24); doc.setFont('helvetica','normal');
   doc.text(monthLabel, 40, 90);
@@ -865,7 +922,7 @@ function buildPdf(){
     doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(27,94,32);
     doc.text('PAID via ' + paymentInfo.method, 50, 132);
     doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(60,90,60);
-    doc.text('on ' + paidDate + (paymentInfo.tr ? ('  •  Ref: ' + paymentInfo.tr) : ''), 50, 146);
+    doc.text('on ' + paidDate, 50, 146);
   } else {
     doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(183,28,46);
     doc.text('PAYMENT STATUS: UNPAID', 40, 132);
