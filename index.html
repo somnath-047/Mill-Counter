@@ -363,7 +363,7 @@
       <input type="text" id="upiId" placeholder="yourname@upi">
     </div>
     <div class="field"><label>Payee / Business Name</label>
-      <input type="text" id="payeeName" placeholder="Meal Counter">
+      <input type="text" id="payeeName" placeholder="Name to show in UPI app (your / business name)">
     </div>
     <button class="save-btn" onclick="saveSettings()">Save Settings</button>
   </div>
@@ -393,36 +393,40 @@
   </div>
 </div>
 
-<!-- UPI fallback modal (shown if no UPI app intercepted the deep link) -->
-<div class="overlay" id="upiFallbackOverlay">
+<!-- Receipt attach modal: shown right after a payment is confirmed (or when attaching later) -->
+<div class="overlay" id="receiptOverlay">
   <div class="modal">
     <div class="modal-head">
-      <h2>Pay manually</h2>
-      <button class="icon-btn" onclick="closeUpiFallback()" aria-label="Close">
+      <h2>Attach payment receipt</h2>
+      <button class="icon-btn" onclick="skipReceipt()" aria-label="Close">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
     </div>
     <p style="font-size:13px;color:var(--ink-600);margin-bottom:16px;line-height:1.5">
-      No UPI app opened automatically. This happens if you're testing on a desktop browser, inside an embedded preview, or don't have a UPI app installed. Open this page directly in a mobile browser tab, or pay manually with the details below.
+      Take the receipt screenshot from your UPI app (payment successful screen) and attach it here. It will be saved with this paid month and can be added inside the PDF when you share it.
     </p>
-    <div class="field"><label>Pay to (UPI ID)</label>
-      <div style="display:flex;gap:8px">
-        <input type="text" id="fbUpiId" readonly style="flex:1;padding:12px 14px;border:1.5px solid var(--line);border-radius:var(--radius-sm);background:var(--cream-100);font-size:15px">
-        <button class="ghost-btn" style="width:70px" onclick="copyText(document.getElementById('fbUpiId').innerText,'UPI ID')">Copy</button>
-      </div>
-    </div>
-    <div class="field"><label>Amount</label>
-      <div style="display:flex;gap:8px">
-        <input type="text" id="fbAmount" readonly style="flex:1;padding:12px 14px;border:1.5px solid var(--line);border-radius:var(--radius-sm);background:var(--cream-100);font-size:15px">
-        <button class="ghost-btn" style="width:70px" onclick="copyText(document.getElementById('fbAmount').innerText,'Amount')">Copy</button>
-      </div>
-    </div>
-    <div class="field"><label>Payee name</label>
-      <input type="text" id="fbPayee" readonly style="width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:var(--radius-sm);background:var(--cream-100);font-size:15px">
-    </div>
-    <button class="save-btn" onclick="retryUpiPayment()">Try Opening UPI App Again</button>
+    <button class="save-btn" onclick="pickReceipt()">📎 Choose receipt screenshot</button>
+    <button class="ghost-btn" style="width:100%;margin-top:10px" onclick="skipReceipt()">Skip for now</button>
   </div>
 </div>
+
+<!-- Receipt choice modal: shown when sharing a month that is already paid -->
+<div class="overlay" id="receiptChoiceOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>Include payment receipt?</h2>
+      <button class="icon-btn" onclick="closeReceiptChoice()" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <p style="font-size:13px;color:var(--ink-600);margin-bottom:16px;line-height:1.5" id="rcText">
+      This month is paid. Do you want to share the PDF together with the payment receipt, or only the PDF?
+    </p>
+    <button class="save-btn" id="rcWithBtn" onclick="chooseWithReceipt()">PDF + Receipt</button>
+    <button class="ghost-btn" style="width:100%;margin-top:10px" onclick="chooseWithoutReceipt()">Only PDF</button>
+  </div>
+</div>
+<input type="file" id="receiptInput" accept="image/*" style="display:none">
 
 <!-- Due chooser modal: shown when there are unpaid past months in addition to the current one -->
 <div class="overlay" id="dueChooserOverlay">
@@ -465,13 +469,25 @@
 
 <script>
 /* ---------- State ---------- */
-let data = JSON.parse(localStorage.getItem('millcounter_data') || '[]');
+// Safe localStorage reader: a corrupted value must never break the whole app.
+function loadJSON(key, fallback){
+  try{
+    const v = JSON.parse(localStorage.getItem(key));
+    return (v && typeof v === 'object') ? v : fallback;
+  }catch(e){ return fallback; }
+}
+let data = loadJSON('millcounter_data', []);
+if(!Array.isArray(data)) data = [];
 let settings = Object.assign(
-  { fullRate: 100, noonRate: 70, nightRate: 50, upiId: '', payeeName: 'Meal Counter' },
-  JSON.parse(localStorage.getItem('millcounter_settings') || '{}')
+  { fullRate: 100, noonRate: 70, nightRate: 50, upiId: '', payeeName: '' },
+  loadJSON('millcounter_settings', {})
 );
-// payments: { "2026-09": { paidAt: <timestamp>, amount: <number>, method: 'UPI', tr: 'MC...' } }
-let payments = JSON.parse(localStorage.getItem('millcounter_payments') || '{}');
+// Older versions saved the placeholder "Meal Counter" as the payee name.
+// The UPI app must show the real payee / business name, so ask again.
+if(settings.payeeName === 'Meal Counter') settings.payeeName = '';
+// payments: { "2026-09": { paidAt, amount, method:'UPI', tr:'MC...', months:[...] } }
+// The receipt image itself is kept in IndexedDB under the key `tr` (too big for localStorage).
+let payments = loadJSON('millcounter_payments', {});
 let viewYear, viewMonth; // 0-indexed month
 let pendingPayment = null; // { months:[keys], amount, tr } set while a UPI payment is in flight
 
@@ -484,7 +500,7 @@ const btnNight = document.getElementById('btnNight');
   const now = new Date();
   viewYear = now.getFullYear();
   viewMonth = now.getMonth();
-  dateEl.valueAsDate = now;
+  dateEl.value = todayStr();
   syncDateToViewedMonth();
   populateSettingsForm();
   updateRateLabels();
@@ -493,6 +509,8 @@ const btnNight = document.getElementById('btnNight');
 
 /* ---------- Helpers ---------- */
 function pad(n){ return String(n).padStart(2,'0'); }
+// Local date as YYYY-MM-DD. (input.valueAsDate uses UTC and gives yesterday's date in India between 12:00 AM and 5:30 AM.)
+function todayStr(){ const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
 function monthKey(y,m){ return `${y}-${pad(m+1)}`; }
 function fmtMoney(n){ return n.toLocaleString('en-IN'); }
 function save(){
@@ -558,7 +576,7 @@ function saveSettings(){
   settings.noonRate = +document.getElementById('noonRate').value || 0;
   settings.nightRate = +document.getElementById('nightRate').value || 0;
   settings.upiId = document.getElementById('upiId').value.trim();
-  settings.payeeName = document.getElementById('payeeName').value.trim() || 'Meal Counter';
+  settings.payeeName = document.getElementById('payeeName').value.trim();
   localStorage.setItem('millcounter_settings', JSON.stringify(settings));
   updateRateLabels();
   closeSettings();
@@ -583,7 +601,7 @@ function syncDateToViewedMonth(){
     const now = new Date();
     const isRealCurrentMonth = (viewYear === now.getFullYear() && viewMonth === now.getMonth());
     if(isRealCurrentMonth){
-      dateEl.valueAsDate = now;
+      dateEl.value = todayStr();
     } else {
       // Keep the same day-of-month when possible (helps entering a
       // sequence of dates in a past month), clamped to that month's length.
@@ -640,6 +658,7 @@ function resetAll(){
     // though every entry it was paid for has just been deleted.
     payments = {};
     savePayments();
+    receiptClear();
     pendingPayment = null;
     save();
     showToast('🗑 All data deleted');
@@ -705,7 +724,7 @@ dateEl.onchange = render;
 // transfer later — a malformed or inactive VPA is one of the most common
 // reasons a UPI payment gets rejected after the PIN step.
 function isValidVpa(vpa){
-  return /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(vpa);
+  return /^[a-zA-Z0-9.\-_+]{2,256}@[a-zA-Z0-9.\-]{2,64}$/.test(vpa);
 }
 
 function payViaUpi(){
@@ -725,6 +744,12 @@ function payViaUpi(){
   }
   if(!isValidVpa(settings.upiId)){
     showToast('⚠️ Your UPI ID looks invalid (should look like name@bank) — check Settings');
+    openSettings();
+    return;
+  }
+
+  if(!settings.payeeName){
+    showToast('⚠️ Add the Payee / Business name in Settings first');
     openSettings();
     return;
   }
@@ -774,25 +799,27 @@ function choosePayAll(){
 }
 
 /* ---- Launching the UPI app + recording the result ---- */
+function shortMonthLabel(key){
+  const [y,m] = key.split('-').map(Number);
+  return new Date(y, m-1, 1).toLocaleDateString('en-US', { month:'short', year:'numeric' });
+}
+
 function initiateUpiPayment(months, amount){
-  const monthLabel = months.map(monthKeyToLabel).join(', ');
-  const note = encodeURIComponent(`Meal Counter Bill - ${monthLabel}`);
-  const pn = encodeURIComponent(settings.payeeName || 'Meal Counter');
-  // A unique transaction reference (tr) on every attempt. Some UPI apps
-  // silently fail or show a stale/duplicate-looking request when tr is
-  // missing or repeated, which is a common (and avoidable) cause of the
-  // "app opens fine but the debit never completes" symptom.
+  // UPI notes are limited to ~50 characters; a longer note makes some apps reject the request.
+  const note = encodeURIComponent(('Bill ' + months.map(shortMonthLabel).join(', ')).slice(0, 50));
+  // The payee / business name entered in Settings is what the UPI app shows.
+  const pn = encodeURIComponent(settings.payeeName);
+  // A unique transaction reference (tr) on every attempt.
   const tr = 'MC' + Date.now();
-  // Always send amount with 2 decimals — a few UPI apps mis-parse a bare
-  // integer amount (e.g. "150" vs "150.00") and reject the request.
+  // Always send amount with 2 decimals.
   const amountStr = Number(amount).toFixed(2);
   const link = `upi://pay?pa=${encodeURIComponent(settings.upiId)}&pn=${pn}&am=${amountStr}&cu=INR&tn=${note}&tr=${tr}`;
 
-  pendingPayment = { months, amount: Number(amountStr), tr };
+  pendingPayment = { months, amount: Number(amountStr), tr, startedAt: Date.now() };
   window._upiAppOpened = false;
 
-  // Anchor-click navigation is more reliable than location.href for custom
-  // URI schemes across mobile browsers.
+  // Anchor-click navigation is more reliable than location.href for custom URI schemes.
+  // The phone itself shows the list of installed UPI apps — nothing else is shown by this app.
   const a = document.createElement('a');
   a.href = link;
   a.style.display = 'none';
@@ -800,29 +827,23 @@ function initiateUpiPayment(months, amount){
   a.click();
   document.body.removeChild(a);
 
-  // If no UPI app intercepts the link, the page stays put (visibility never
-  // changes). Show a manual fallback after a short delay so the person is
-  // never stuck.
-  clearTimeout(window._upiFallbackTimer);
-  window._upiFallbackTimer = setTimeout(() => {
-    if(!window._upiAppOpened){
-      openUpiFallback(settings.upiId, amount, settings.payeeName || 'Meal Counter');
+  clearTimeout(window._upiHintTimer);
+  window._upiHintTimer = setTimeout(() => {
+    if(pendingPayment && !window._upiAppOpened && !document.hidden){
+      showToast('Choose a UPI app to continue');
     }
-  }, 1200);
+  }, 2500);
 }
 
-// A static web page has no way to ask the bank whether a UPI transfer
-// actually completed — that decision happens entirely inside the bank's
-// UPI app and the NPCI network, after the PIN screen, and nothing on this
-// page (or any web page) can see the outcome. The best it can do is notice
-// when the person leaves for the UPI app and comes back, then ask them to
-// confirm what happened, so the bill is only marked PAID on the person's
-// own word.
+// A web page cannot ask the bank whether a UPI transfer completed. We notice when the
+// person leaves for the UPI app and comes back, then ask them to confirm.
 document.addEventListener('visibilitychange', () => {
   if(document.hidden){
     if(pendingPayment){
+      // Ignore a payment attempt that has been sitting for a long time.
+      if(Date.now() - pendingPayment.startedAt > 15*60*1000){ pendingPayment = null; return; }
       window._upiAppOpened = true;
-      clearTimeout(window._upiFallbackTimer);
+      clearTimeout(window._upiHintTimer);
     }
   } else {
     if(pendingPayment && window._upiAppOpened){
@@ -839,66 +860,129 @@ function openPaymentConfirm(){
 }
 function confirmPaymentSuccess(success){
   document.getElementById('paymentConfirmOverlay').classList.remove('show');
-  if(!pendingPayment){ return; }
+  const pp = pendingPayment;
+  pendingPayment = null;
+  window._upiAppOpened = false;
+  if(!pp) return;
   if(success){
-    pendingPayment.months.forEach(key => {
+    pp.months.forEach(key => {
       payments[key] = {
         paidAt: Date.now(),
         amount: totalForMonthKey(key),
         method: 'UPI',
-        tr: pendingPayment.tr
+        tr: pp.tr,
+        months: pp.months.slice()
       };
     });
     savePayments();
-    showToast('✅ Marked as PAID — ' + pendingPayment.months.map(monthKeyToLabel).join(', '));
+    showToast('✅ Marked as PAID — ' + pp.months.map(monthKeyToLabel).join(', '));
     render();
+    // Ask for the receipt so it can travel with the PDF later.
+    openReceiptAttach(pp.tr, null);
   } else {
-    showToast('Not marked as paid. You can try again or pay manually.');
-    openUpiFallback(settings.upiId, pendingPayment.amount, settings.payeeName || 'Meal Counter');
+    showToast('Not marked as paid. Tap "Pay via UPI" to try again.');
   }
-  pendingPayment = null;
-  window._upiAppOpened = false;
 }
 
-function openUpiFallback(upiId, amount, payeeName){
-  document.getElementById('fbUpiId').innerText = upiId;
-  document.getElementById('fbAmount').innerText = '₹' + fmtMoney(amount);
-  document.getElementById('fbPayee').innerText = payeeName;
-  document.getElementById('upiFallbackOverlay').classList.add('show');
+/* ---------- Payment receipt storage (IndexedDB) ---------- */
+function idbOpen(){
+  return new Promise((resolve, reject) => {
+    if(!window.indexedDB){ reject(new Error('IndexedDB not available')); return; }
+    const req = indexedDB.open('millcounter_receipts', 1);
+    req.onupgradeneeded = () => { req.result.createObjectStore('receipts'); };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
 }
-function closeUpiFallback(){ document.getElementById('upiFallbackOverlay').classList.remove('show'); }
-function retryUpiPayment(){
-  closeUpiFallback();
-  // Reuse the same months/amount if a payment was already in flight,
-  // instead of recomputing from scratch and possibly losing a "pay past
-  // dues too" choice the person already made.
-  if(pendingPayment){
-    initiateUpiPayment(pendingPayment.months, pendingPayment.amount);
-  } else {
-    payViaUpi();
+async function idbRun(mode, fn){
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('receipts', mode);
+    const req = fn(tx.objectStore('receipts'));
+    tx.oncomplete = () => { db.close(); resolve(req ? req.result : undefined); };
+    tx.onerror = tx.onabort = () => { db.close(); reject(tx.error || new Error('Storage error')); };
+  });
+}
+function receiptPut(id, value){ return idbRun('readwrite', st => st.put(value, id)); }
+async function receiptGet(id){
+  try{ return (await idbRun('readonly', st => st.get(id))) || null; }catch(e){ return null; }
+}
+function receiptClear(){ return idbRun('readwrite', st => st.clear()).catch(() => {}); }
+
+// Shrinks the screenshot so many receipts fit comfortably on the device.
+function compressImage(file){
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 1800;
+      const scale = Math.min(1, MAX / Math.max(img.naturalWidth, img.naturalHeight));
+      const w = Math.max(1, Math.round(img.naturalWidth * scale));
+      const h = Math.max(1, Math.round(img.naturalHeight * scale));
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      resolve({ dataUrl: c.toDataURL('image/jpeg', 0.85), w, h });
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Not a readable image')); };
+    img.src = url;
+  });
+}
+
+let _receiptTargetTr = null;
+let _receiptAfter = null;
+function openReceiptAttach(tr, after){
+  _receiptTargetTr = tr;
+  _receiptAfter = after || null;
+  document.getElementById('receiptOverlay').classList.add('show');
+}
+function pickReceipt(){ document.getElementById('receiptInput').click(); }
+function skipReceipt(){
+  document.getElementById('receiptOverlay').classList.remove('show');
+  const cb = _receiptAfter; _receiptAfter = null;
+  if(cb) cb(false);
+}
+document.getElementById('receiptInput').addEventListener('change', async (e) => {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if(!file || !_receiptTargetTr) return;
+  if(!file.type.startsWith('image/')){ showToast('Please choose an image (screenshot) of the receipt'); return; }
+  try{
+    const img = await compressImage(file);
+    await receiptPut(_receiptTargetTr, img);
+    document.getElementById('receiptOverlay').classList.remove('show');
+    showToast('📎 Receipt saved');
+    const cb = _receiptAfter; _receiptAfter = null;
+    if(cb) cb(true);
+  }catch(err){
+    showToast('Could not save the receipt. Try another image.');
   }
-}
-function copyText(text, label){
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(text).then(() => showToast('📋 ' + label + ' copied'))
-      .catch(() => showToast('Could not copy — long-press to select instead'));
-  } else {
-    showToast('Could not copy — long-press to select instead');
-  }
-}
+});
 
 /* ---------- PDF / share ---------- */
-function buildPdf(){
+let shareWithReceipt = false;
+
+// File name = the month being billed, e.g. "September-2026"
+function monthFileBase(){
+  return monthKeyToLabel(monthKey(viewYear, viewMonth)).replace(/\s+/g, '-');
+}
+
+async function buildPdf(includeReceipt){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'pt', format: 'a4' });
   const entries = monthEntries().slice().sort((a,b) => a.date.localeCompare(b.date));
   const total = entries.reduce((sum,x) => sum + x.rate, 0);
-  const monthLabel = document.getElementById('monthLabel').innerText;
   const currentKey = monthKey(viewYear, viewMonth);
+  const monthLabel = monthKeyToLabel(currentKey);
   const paymentInfo = payments[currentKey];
+  const paidDate = paymentInfo
+    ? new Date(paymentInfo.paidAt).toLocaleString('en-IN', { dateStyle:'medium', timeStyle:'short' })
+    : '';
 
-  // Small logo to the left of the title, reused from the app header so the
-  // bill is recognizable at a glance without shipping a second image asset.
   const logoEl = document.querySelector('.logo img');
   const textX = logoEl ? 74 : 40;
   if(logoEl && logoEl.src){
@@ -913,10 +997,7 @@ function buildPdf(){
   doc.text(monthLabel, 40, 90);
   if(settings.payeeName){ doc.text('Billed by: ' + settings.payeeName, 40, 106); }
 
-  // Payment status / process section, so the recipient can see at a glance
-  // whether this bill has already been settled and how.
   if(paymentInfo){
-    const paidDate = new Date(paymentInfo.paidAt).toLocaleString('en-IN', { dateStyle:'medium', timeStyle:'short' });
     doc.setDrawColor(46,125,50); doc.setLineWidth(1);
     doc.roundedRect(40, 116, 300, 40, 6, 6);
     doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(27,94,32);
@@ -929,7 +1010,8 @@ function buildPdf(){
   }
 
   let y = 176;
-  doc.setDrawColor(230,220,200);
+  doc.setTextColor(43,33,24);
+  doc.setDrawColor(230,220,200); doc.setLineWidth(0.5);
   doc.line(40, y-14, 555, y-14);
   doc.setFont('helvetica','bold'); doc.setFontSize(11);
   doc.text('Date', 40, y);
@@ -948,6 +1030,7 @@ function buildPdf(){
     y += 20;
   });
 
+  if(y > 760){ doc.addPage(); y = 50; }   // keep the Total row on a page
   y += 10;
   doc.setDrawColor(43,33,24);
   doc.line(40, y, 555, y);
@@ -956,30 +1039,100 @@ function buildPdf(){
   doc.text('Total', 40, y);
   doc.text('Rs. ' + fmtMoney(total), 480, y, { align:'right' });
 
+  /* ---- Payment receipt page (only when the person chose to include it) ---- */
+  if(includeReceipt && paymentInfo){
+    const r = await receiptGet(paymentInfo.tr);
+    if(r && r.dataUrl){
+      doc.addPage();
+      doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.setTextColor(43,33,24);
+      doc.text('Payment Receipt', 40, 50);
+      doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(120,100,80);
+      doc.text(monthLabel + '  |  Paid via ' + paymentInfo.method + ' on ' + paidDate, 40, 68);
+      let top = 84;
+      if(paymentInfo.months && paymentInfo.months.length > 1){
+        doc.text('This receipt covers: ' + paymentInfo.months.map(shortMonthLabel).join(', '), 40, 82);
+        top = 98;
+      }
+      const maxW = 515, maxH = 842 - top - 40;
+      const k = Math.min(maxW / r.w, maxH / r.h);
+      const w = r.w * k, h = r.h * k;
+      try{
+        doc.addImage(r.dataUrl, 'JPEG', 40 + (maxW - w) / 2, top, w, h);
+      }catch(e){
+        doc.setTextColor(183,28,46);
+        doc.text('Receipt image could not be embedded.', 40, top + 20);
+      }
+    }
+  }
+
   return doc;
 }
 
-function openShareSheet(){
+async function openShareSheet(){
   if(monthEntries().length === 0){ showToast('No entries to share this month'); return; }
-  document.getElementById('shareOverlay').classList.add('show');
+  const p = payments[monthKey(viewYear, viewMonth)];
+  if(!p){
+    // Not paid: there is no receipt, nothing to ask.
+    shareWithReceipt = false;
+    document.getElementById('shareOverlay').classList.add('show');
+    return;
+  }
+  const has = !!(await receiptGet(p.tr));
+  document.getElementById('rcWithBtn').innerText = has ? 'PDF + Receipt' : '📎 Attach receipt & include';
+  document.getElementById('rcText').innerText = has
+    ? 'This month is paid. Do you want to share the PDF together with the payment receipt, or only the PDF?'
+    : 'This month is paid, but no receipt is attached yet. Attach the receipt screenshot to include it in the PDF, or share only the PDF.';
+  document.getElementById('receiptChoiceOverlay').classList.add('show');
 }
 function closeShareSheet(){ document.getElementById('shareOverlay').classList.remove('show'); }
+function closeReceiptChoice(){ document.getElementById('receiptChoiceOverlay').classList.remove('show'); }
+
+async function chooseWithReceipt(){
+  const p = payments[monthKey(viewYear, viewMonth)];
+  if(!p){ chooseWithoutReceipt(); return; }
+  closeReceiptChoice();
+  if(await receiptGet(p.tr)){
+    shareWithReceipt = true;
+    document.getElementById('shareOverlay').classList.add('show');
+  } else {
+    openReceiptAttach(p.tr, (ok) => {
+      if(ok){ shareWithReceipt = true; document.getElementById('shareOverlay').classList.add('show'); }
+      else { openShareSheet(); }   // skipped: ask again
+    });
+  }
+}
+function chooseWithoutReceipt(){
+  shareWithReceipt = false;
+  closeReceiptChoice();
+  document.getElementById('shareOverlay').classList.add('show');
+}
 
 async function sharePdf(useShareSheet){
-  const doc = buildPdf();
-  const monthLabel = document.getElementById('monthLabel').innerText.replace(' ','-');
-  const filename = `MealCounter-${monthLabel}.pdf`;
+  if(!window.jspdf){ showToast('PDF tool not loaded — connect to the internet once and retry'); return; }
+  let doc;
+  try{
+    doc = await buildPdf(shareWithReceipt);
+  }catch(e){
+    showToast('Could not create the PDF');
+    return;
+  }
+  const base = monthFileBase();
+  const filename = `${base}.pdf`;
 
   if(useShareSheet && navigator.canShare){
     try{
       const blob = doc.output('blob');
       const file = new File([blob], filename, { type: 'application/pdf' });
       if(navigator.canShare({ files: [file] })){
-        await navigator.share({ files: [file], title: 'Meal Counter Bill', text: 'Meal Counter bill' });
+        await navigator.share({ files: [file], title: base });
         closeShareSheet();
         return;
       }
-    }catch(e){ /* fall through to download */ }
+    }catch(e){
+      // The person closed the share sheet: do nothing (do not download a file they didn't ask for).
+      if(e && e.name === 'AbortError'){ closeShareSheet(); return; }
+      /* any other error: fall through to download */
+    }
   }
   doc.save(filename);
   closeShareSheet();
@@ -987,25 +1140,30 @@ async function sharePdf(useShareSheet){
 }
 
 async function shareAsImage(){
+  if(typeof html2canvas === 'undefined'){ showToast('Image tool not loaded — connect to the internet once and retry'); return; }
   showToast('Capturing bill…');
   const card = document.getElementById('billCard');
   try{
     const canvas = await html2canvas(card, { backgroundColor: '#FFFCF5', scale: 2 });
     canvas.toBlob(async (blob) => {
-      const monthLabel = document.getElementById('monthLabel').innerText.replace(' ','-');
-      const filename = `MealCounter-${monthLabel}.png`;
+      if(!blob){ showToast('Could not capture image'); return; }
+      const base = monthFileBase();
+      const filename = `${base}.png`;
       const file = new File([blob], filename, { type: 'image/png' });
       if(navigator.canShare && navigator.canShare({ files: [file] })){
         try{
-          await navigator.share({ files: [file], title: 'Meal Counter Bill' });
+          await navigator.share({ files: [file], title: base });
           closeShareSheet();
           return;
-        }catch(e){ /* user cancelled or unsupported, fall through */ }
+        }catch(e){
+          if(e && e.name === 'AbortError'){ closeShareSheet(); return; }
+          /* unsupported: fall through to download */
+        }
       }
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url; a.download = filename; a.click();
-      URL.revokeObjectURL(url);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
       closeShareSheet();
       showToast('🖼 Image downloaded');
     }, 'image/png');
@@ -1016,36 +1174,11 @@ async function shareAsImage(){
 </script>
 <script>
 if ('serviceWorker' in navigator) {
-
   window.addEventListener('load', function () {
-
-    navigator.serviceWorker.register('sw.js?v=4')
-      .then(function (registration) {
-
-        console.log(
-          'Meal Counter Service Worker registered:',
-          registration.scope
-        );
-
-        /*
-         * Check for a new Service Worker every time
-         * the website is opened.
-         */
-
-        registration.update();
-
-      })
-      .catch(function (error) {
-
-        console.error(
-          'Meal Counter Service Worker registration failed:',
-          error
-        );
-
-      });
-
+    navigator.serviceWorker.register('sw.js').catch(function (err) {
+      console.log('Service worker register failed:', err);
+    });
   });
-
 }
 </script>
 </body>

@@ -1,106 +1,59 @@
 const CACHE_NAME = "meal-counter-v4";
-
-const ASSETS_TO_CACHE = [
+const LOCAL_ASSETS = [
   "./",
   "./index.html",
   "./manifest.json",
   "./icons/icon-192.png",
-  "./icons/icon-512.png",
-  "./icons/icon-512-maskable.png"
+  "./icons/icon-512.png"
 ];
-
-/* ================================
-   INSTALL
-================================ */
+// Libraries loaded from a CDN: cached too, so PDF / image sharing keeps working offline.
+const CDN_ASSETS = [
+  "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
-  );
-
-  // Activate the new service worker immediately
-  self.skipWaiting();
-});
-
-
-/* ================================
-   ACTIVATE
-================================ */
-
-self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames
-          .filter((name) => name !== CACHE_NAME)
-          .map((name) => caches.delete(name))
+    caches.open(CACHE_NAME).then(async (cache) => {
+      await cache.addAll(LOCAL_ASSETS);
+      await Promise.allSettled(
+        CDN_ASSETS.map((url) => fetch(url, { mode: "no-cors" }).then((res) => cache.put(url, res)))
       );
     })
   );
+  self.skipWaiting();
+});
 
-  // Take control of all open pages immediately
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+    )
+  );
   self.clients.claim();
 });
 
-
-/* ================================
-   FETCH
-================================ */
-
+// Network first, cache as the offline fallback, so an updated index.html always
+// reaches the user instead of being hidden behind an old cached copy.
 self.addEventListener("fetch", (event) => {
-
-  /*
-   * For page navigation / HTML:
-   * Always try the latest version from the server first.
-   *
-   * This prevents GitHub Pages from showing
-   * an old cached index.html after an update.
-   */
-
-  if (event.request.mode === "navigate") {
-
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-
-          // Save the latest HTML in cache
-          const responseClone = response.clone();
-
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put("./index.html", responseClone);
-          });
-
-          return response;
-        })
-        .catch(() => {
-
-          // If there is no internet,
-          // use the cached version.
-          return caches.match("./index.html");
-        })
-    );
-
-    return;
-  }
-
-
-  /*
-   * For other files:
-   * Use cache if available.
-   * Otherwise request from the server.
-   */
-
+  const req = event.request;
+  if (req.method !== "GET" || !req.url.startsWith("http")) return;
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-
-      return fetch(event.request);
-    })
+    fetch(req)
+      .then((res) => {
+        if (res && (res.status === 200 || res.type === "opaque")) {
+          const copy = res.clone();
+          caches.open(CACHE_NAME).then((c) => c.put(req, copy)).catch(() => {});
+        }
+        return res;
+      })
+      .catch(() =>
+        caches.match(req).then(
+          (cached) =>
+            cached ||
+            (req.mode === "navigate" ? caches.match("./index.html") : null) ||
+            Response.error()
+        )
+      )
   );
-
 });
